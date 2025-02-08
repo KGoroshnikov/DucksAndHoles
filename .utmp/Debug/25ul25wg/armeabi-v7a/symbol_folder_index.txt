@@ -1,0 +1,1 @@
+D:\DucksAndHoles\Library\PramData\AndroidApplicationController\Cache\com.unity.template.ar_mobile\gradle-project\unityLibrary\build\intermediates\cxx\Debug\25ul25wg\obj\armeabi-v7a
