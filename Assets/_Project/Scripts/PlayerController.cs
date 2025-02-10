@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class GyroPlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviour
 {
     [Header("Settings")]
     [SerializeField] private AnimationCurve speedXangle;
@@ -19,11 +19,12 @@ public class GyroPlayerController : MonoBehaviour
     private State m_state = State.idle;
 
     [Header("Init")]
-    [SerializeField] private PhoneInputData phoneInputData;
+    private PhoneInputData phoneInputData;
     [SerializeField] private Animator animator;
     [SerializeField] private Transform duckMesh;
 
     void OnEnable(){
+        phoneInputData = GameObject.Find("PhoneData").GetComponent<PhoneInputData>();
         phoneInputData.OnStartTouch += StartMoving;
         phoneInputData.OnEndTouch += StopMoving;
     }

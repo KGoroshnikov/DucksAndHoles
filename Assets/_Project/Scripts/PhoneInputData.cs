@@ -30,6 +30,10 @@ public class PhoneInputData : MonoBehaviour
         inputActions.Disable();
     }
 
+    public Vector2 GetTapPos(){
+        return inputActions.MyActions.TapPos.ReadValue<Vector2>();
+    }
+
     void TouchStarted(InputAction.CallbackContext context){
         if (OnStartTouch != null)
             OnStartTouch(inputActions.MyActions.TapPos.ReadValue<Vector2>());

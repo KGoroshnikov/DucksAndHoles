@@ -235,8 +235,8 @@ GameObject:
   m_Component:
   - component: {fileID: 7152914573636472031}
   - component: {fileID: 80584247924624918}
-  - component: {fileID: 7210240558340287709}
   - component: {fileID: 4243394343473211266}
+  - component: {fileID: 3821425121585784369}
   m_Layer: 0
   m_Name: Duck
   m_TagString: Untagged
@@ -254,7 +254,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
   m_LocalPosition: {x: -0.6338797, y: 0.5853, z: -0.483}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 699364405512857125}
@@ -282,24 +282,6 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.05
   m_Center: {x: 0, y: 0.04881406, z: 0}
---- !u!114 &7210240558340287709
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4277089788896512214}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 22e8c6fb518dc6d47a91caf3668d33d1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxSpeed: 2.5
-  smoothTime: 0.2
-  deadZone: 1.2
-  m_state: 0
-  phoneInputData: {fileID: 0}
-  animator: {fileID: 4243394343473211266}
 --- !u!95 &4243394343473211266
 Animator:
   serializedVersion: 7
@@ -322,6 +304,50 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &3821425121585784369
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4277089788896512214}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: feff6781817ed54479b2633bd289f6db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  speedXangle:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  speedMul: 0.004
+  forceDamp: 0.95
+  maxSpeed: 0.005
+  deadZone: 2
+  maxPhoneAngle: 30
+  speedAnimMul: 2500
+  animator: {fileID: 4243394343473211266}
+  duckMesh: {fileID: 4885970196869152572}
 --- !u!1 &5719326145753577430
 GameObject:
   m_ObjectHideFlags: 0

@@ -9,7 +9,12 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private int wallCount = 10;
     [SerializeField] private float minRequiredArea = 1.0f;
 
-    private float CalculatePolygonArea(List<Vector2> polygon)
+    [SerializeField] private ParticleSystem grassVFX;
+    [SerializeField] private int grassAmountPerArea;
+    [SerializeField] private ParticleSystem glowsVFX;
+    [SerializeField] private int glowsAmountPerArea;
+
+    public static float CalculatePolygonArea(List<Vector2> polygon)
     {
         float area = 0f;
         int j = polygon.Count - 1;
@@ -83,6 +88,23 @@ public class MapGenerator : MonoBehaviour
                 spawnedWalls++;
             }
         }
-        Debug.Log("Сгенерировано стен: " + spawnedWalls);
+
+        SetupVFX(targetPlane, grassVFX, grassAmountPerArea);
+        SetupVFX(targetPlane, glowsVFX, glowsAmountPerArea);
+    }
+
+    void SetupVFX(ARPlane currentPlane, ParticleSystem particles, int ppa){
+        MeshFilter meshFilter = currentPlane.GetComponent<MeshFilter>();
+        Mesh planeMesh = meshFilter.mesh;
+        var shape = particles.shape;
+        var mainModule = particles.main;
+        shape.shapeType = ParticleSystemShapeType.Mesh;
+        shape.mesh = planeMesh;
+        List<Vector2> boundary = new List<Vector2>(currentPlane.boundary);
+        float area = MapGenerator.CalculatePolygonArea(boundary);
+        mainModule.maxParticles = (int)(area * ppa);
+        particles.transform.position = currentPlane.transform.position;
+        particles.transform.rotation = currentPlane.transform.rotation;
+        particles.Play();
     }
 }
