@@ -1,0 +1,76 @@
+{
+    "name": "MyInput",
+    "maps": [
+        {
+            "name": "MyActions",
+            "id": "801328b5-da83-4720-830b-5ca47509c4ea",
+            "actions": [
+                {
+                    "name": "Tap",
+                    "type": "Button",
+                    "id": "767fbcff-0e0d-44b3-9bd3-59e8db0cfbb8",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "TapPos",
+                    "type": "Value",
+                    "id": "f5647c0e-b9d1-41f2-9001-fac716f58147",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "d18a99a5-2776-4c88-86a3-e0cbe44f2452",
+                    "path": "<Touchscreen>/primaryTouch/press",
+                    "interactions": "Press(behavior=2)",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Tap",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "dee55c16-b6e2-4e30-bf5e-e966db251e3b",
+                    "path": "<Mouse>/press",
+                    "interactions": "Press(behavior=2)",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Tap",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "189e67b1-4124-4155-86b2-8470dceb2e82",
+                    "path": "<Touchscreen>/primaryTouch/position",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "TapPos",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "87209892-fd05-420f-a1fe-987ec1847b31",
+                    "path": "<Mouse>/position",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "TapPos",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}
