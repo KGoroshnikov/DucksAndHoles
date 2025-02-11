@@ -15,7 +15,7 @@ public class PlayerController : MonoBehaviour
     private Vector3 neutralEuler;
     private float rotAngleAnim;
     
-    private enum State { idle, running }
+    private enum State { idle, running, afk }
     private State m_state = State.idle;
 
     [Header("Init")]
@@ -55,6 +55,8 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        if (m_state == State.afk) return;
+
         transform.Translate(currentForce, Space.World);
 
         if (m_state != State.running){
@@ -95,6 +97,10 @@ public class PlayerController : MonoBehaviour
 
         rotAngleAnim += speedAnimMul * currentForce.magnitude;
         duckMesh.transform.localEulerAngles = new Vector3(rotAngleAnim, 0, 90);
+    }
+
+    public void DisableGoose(){
+        m_state = State.afk;
     }
 
     void OnGUI()

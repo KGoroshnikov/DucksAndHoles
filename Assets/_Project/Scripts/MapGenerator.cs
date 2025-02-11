@@ -14,6 +14,9 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private ParticleSystem glowsVFX;
     [SerializeField] private int glowsAmountPerArea;
 
+    [SerializeField] private GameObject theHole;
+    [SerializeField] private Transform transformHole;
+
     public static float CalculatePolygonArea(List<Vector2> polygon)
     {
         float area = 0f;
@@ -91,6 +94,8 @@ public class MapGenerator : MonoBehaviour
 
         SetupVFX(targetPlane, grassVFX, grassAmountPerArea);
         SetupVFX(targetPlane, glowsVFX, glowsAmountPerArea);
+
+        Instantiate(theHole, transformHole.position, transformHole.rotation);
     }
 
     void SetupVFX(ARPlane currentPlane, ParticleSystem particles, int ppa){
