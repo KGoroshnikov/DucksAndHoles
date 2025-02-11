@@ -108,7 +108,7 @@ public class MapGenerator : MonoBehaviour
         List<Vector2> boundary = new List<Vector2>(currentPlane.boundary);
         float area = MapGenerator.CalculatePolygonArea(boundary);
         mainModule.maxParticles = (int)(area * ppa);
-        particles.transform.position = currentPlane.transform.position;
+        particles.transform.position = currentPlane.transform.position + new Vector3(0, 0.005f, 0);
         particles.transform.rotation = currentPlane.transform.rotation;
         particles.Play();
     }

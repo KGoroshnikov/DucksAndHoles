@@ -3,7 +3,9 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     [Header("Settings")]
-    [SerializeField] private AnimationCurve speedXangle;
+    [SerializeField] private float accelerationForce;
+    [SerializeField] private float brakeForce;
+
     [SerializeField] private float speedMul;
     [SerializeField] private float forceDamp;
     [SerializeField] private float maxSpeed;
@@ -11,17 +13,47 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float maxPhoneAngle = 30f;
     [SerializeField] private float speedAnimMul;
 
+    [Header("Dash settings")]
+    [SerializeField] private float jerkThreshold = 1.5f;
+    [SerializeField] private float smoothingFactor = 0.2f;
+    [SerializeField] private float jerkCooldown = 1f;
+    [SerializeField] private float dashDamp;
+    [SerializeField] private float dashSpeed;
+    private bool isDashAvaliable = true;
+    private Vector3 lowPassValue = Vector3.zero;
+    private Vector3 jerkVector = Vector3.zero;
+
     private Vector3 currentForce;
+    private Vector3 deviceJerk;
+    private Vector3 dashForce;
     private Vector3 neutralEuler;
     private float rotAngleAnim;
+    private Vector3 worldMovement;
     
     private enum State { idle, running, afk }
-    private State m_state = State.idle;
+    [SerializeField] private State m_state = State.idle;
 
     [Header("Init")]
-    private PhoneInputData phoneInputData;
     [SerializeField] private Animator animator;
+    private PhoneInputData phoneInputData;
     [SerializeField] private Transform duckMesh;
+    [SerializeField] private ParticleSystem puffVFX, dirtParticles;
+    [SerializeField] private TrailRenderer trail;
+    [SerializeField] private Rigidbody rb;
+    private float _y;
+
+    void Start()
+    {
+        m_state = State.afk;
+        trail.emitting = false;
+        lowPassValue = phoneInputData.GetUserAcceleration();
+    }
+
+    public void ActivateGoose(float _gameY){
+        m_state = State.idle;
+        trail.emitting = true;
+        _y = _gameY + 0.01f;
+    }
 
     void OnEnable(){
         phoneInputData = GameObject.Find("PhoneData").GetComponent<PhoneInputData>();
@@ -35,6 +67,8 @@ public class PlayerController : MonoBehaviour
     public void StartMoving(Vector2 touchPos)
     {
         if (m_state != State.idle) return;
+        puffVFX.Play();
+        dirtParticles.Play();
         m_state = State.running;
         neutralEuler = GyroToUnity(phoneInputData.GetAttitude()).eulerAngles;
         animator.SetTrigger("BallMode");
@@ -47,21 +81,55 @@ public class PlayerController : MonoBehaviour
 
     public void StopMoving(Vector2 touchPos)
     {
+        if (m_state == State.afk) return;
         m_state = State.idle;
         animator.SetTrigger("IdleMode");
+        dirtParticles.Stop();
+        worldMovement = Vector3.zero;
         rotAngleAnim = -90;
         duckMesh.transform.localEulerAngles = new Vector3(rotAngleAnim, 0, 90);
     }
 
-    void Update()
+    void ResetDash(){
+        isDashAvaliable = true;
+    }
+
+    void ProcessDash(){
+        if (!isDashAvaliable) return;
+
+        Vector3 currentAccel = phoneInputData.GetUserAcceleration();
+        lowPassValue = Vector3.Lerp(lowPassValue, currentAccel, smoothingFactor);
+        Vector3 deltaAccel = currentAccel - lowPassValue;
+        if (deltaAccel.magnitude > jerkThreshold)
+        {
+            deviceJerk = deltaAccel.normalized;
+            deviceJerk = new Vector3(deviceJerk.x, deviceJerk.z, deviceJerk.y);
+            
+            Vector3 worldJerk = Camera.main.transform.TransformDirection(deviceJerk).normalized;
+            isDashAvaliable = false;
+            jerkVector = new Vector3(-worldJerk.x, 0, -worldJerk.z);
+            dashForce += jerkVector * dashSpeed;
+            Invoke("ResetDash", jerkCooldown);
+        }
+        
+    }
+
+    void FixedUpdate()
     {
         if (m_state == State.afk) return;
 
-        transform.Translate(currentForce, Space.World);
+        ProcessDash();
+
+        //transform.Translate(currentForce, Space.World);
+        rb.linearVelocity = currentForce + dashForce;
+
+        if (dashForce.magnitude > 0.01f ) dashForce *= dashDamp;
+        else dashForce = Vector3.zero; 
+        
 
         if (m_state != State.running){
             currentForce *= forceDamp;
-            if (currentForce.magnitude <= 0.000001f) currentForce = Vector3.zero; 
+            if (currentForce.magnitude <= 0.0001f) currentForce = Vector3.zero; 
             return;
         }
 
@@ -84,23 +152,45 @@ public class PlayerController : MonoBehaviour
         camForward.Normalize();
         Vector3 camRight = Vector3.Cross(Vector3.up, camForward);
 
-        Vector3 worldMovement = (input2D.y * camForward) + (input2D.x * camRight);
+        worldMovement = (input2D.y * camForward) + (input2D.x * camRight);
         //worldMovement = worldMovement.normalized;
 
-        Vector3 finalSpeed = worldMovement * speedXangle.Evaluate(worldMovement.magnitude) * speedMul * Time.deltaTime;
-        currentForce += finalSpeed;
+        Vector3 finalSpeed = worldMovement * speedMul * Time.deltaTime;
+        //currentForce += finalSpeed;
+        float dot = Vector3.Dot(currentForce.normalized, worldMovement.normalized);
+        currentForce += Mathf.Lerp(brakeForce, accelerationForce, dot) * finalSpeed;
+        
         currentForce = Vector3.ClampMagnitude(currentForce, maxSpeed);
-        Debug.Log("currentForce: " + currentForce + " worldMovement: " + worldMovement + " worldMovement.magnitude: " + worldMovement.magnitude + " speed: " + speedXangle.Evaluate(worldMovement.magnitude));
 
         if (worldMovement != Vector3.zero)
-            transform.forward = worldMovement;
+            transform.forward = currentForce.normalized;
 
+        UpdateRotationAnim();
+
+        UpdateParticles();
+    }
+
+    void UpdateParticles(){
+        var emission = dirtParticles.emission;
+        emission.rateOverTime = Mathf.Lerp(0, 10, worldMovement.magnitude);
+        trail.transform.localPosition = new Vector3(0, _y, 0);
+        trail.transform.position = new Vector3(trail.transform.position.x, _y, trail.transform.position.z);
+    }
+
+    void UpdateRotationAnim(){
         rotAngleAnim += speedAnimMul * currentForce.magnitude;
         duckMesh.transform.localEulerAngles = new Vector3(rotAngleAnim, 0, 90);
     }
 
     public void DisableGoose(){
         m_state = State.afk;
+        trail.emitting = false;
+        dirtParticles.Stop();
+        animator.SetTrigger("IdleMode");
+        currentForce = Vector3.zero;
+        dashForce = Vector3.zero;
+        rotAngleAnim = 90;
+        duckMesh.transform.localEulerAngles = new Vector3(rotAngleAnim, 0, 90);
     }
 
     void OnGUI()
@@ -110,8 +200,12 @@ public class PlayerController : MonoBehaviour
         guiStyle.fontSize = 40;
         float yOffset = 50;
         float lvlOffset = 50;
-        GUI.Label(new Rect(10, yOffset + lvlOffset * 1, 300, 200), "currentForce: " + currentForce, guiStyle);
-        GUI.Label(new Rect(10, yOffset + lvlOffset * 2, 300, 200), "current magnitude: " + currentForce.magnitude, guiStyle);
-        GUI.Label(new Rect(10, yOffset + lvlOffset * 3, 300, 200), "max allowed magnitude: " + maxSpeed, guiStyle);
+        GUI.Label(new Rect(10, yOffset + lvlOffset * 1, 300, 200), "worldMovement: " + worldMovement, guiStyle);
+        GUI.Label(new Rect(10, yOffset + lvlOffset * 2, 300, 200), "currentForce: " + currentForce, guiStyle);
+        GUI.Label(new Rect(10, yOffset + lvlOffset * 3, 300, 200), "current magnitude: " + currentForce.magnitude, guiStyle);
+        GUI.Label(new Rect(10, yOffset + lvlOffset * 4, 300, 200), "max allowed magnitude: " + maxSpeed, guiStyle);
+        GUI.Label(new Rect(10, yOffset + lvlOffset * 5, 300, 200), "device dash: " + deviceJerk, guiStyle);
+        GUI.Label(new Rect(10, yOffset + lvlOffset * 6, 300, 200), "dash vector: " + jerkVector, guiStyle);
+        GUI.Label(new Rect(10, yOffset + lvlOffset * 7, 300, 200), "dashForce: " + dashForce, guiStyle);
     }
 }

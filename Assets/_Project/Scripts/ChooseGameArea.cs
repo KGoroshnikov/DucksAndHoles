@@ -83,6 +83,7 @@ public class ChooseGameArea : MonoBehaviour
             if (plane == currentPlane) continue;
             Destroy(plane.gameObject);
         }
+        spawnedGoose.GetComponent<PlayerController>().ActivateGoose(currentPlane.transform.position.y);
 
         return currentPlane;
     }

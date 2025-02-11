@@ -15,7 +15,7 @@ public class MoveObjects : MonoBehaviour
     }
     private List<obj> objs = new List<obj>();
 
-    void Update()
+    void FixedUpdate()
     {
         List<obj> objsToRemove = new List<obj>(); 
         for(int i = 0; i < objs.Count; i++){
