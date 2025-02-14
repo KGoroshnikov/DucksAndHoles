@@ -23,7 +23,13 @@ public class PlayerController : MonoBehaviour
     private Vector3 lowPassValue = Vector3.zero;
     private Vector3 jerkVector = Vector3.zero;
 
+    [Header("Collide settings")]
+    [SerializeField] private string regularWallTag;
+    [SerializeField] private string breakableWallTag;
+    [SerializeField] private float minFoceToHitWall;
+
     private Vector3 currentForce;
+    private Vector3 deviceAccelerationRaw;
     private Vector3 deviceJerk;
     private Vector3 dashForce;
     private Vector3 neutralEuler;
@@ -37,7 +43,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Animator animator;
     private PhoneInputData phoneInputData;
     [SerializeField] private Transform duckMesh;
-    [SerializeField] private ParticleSystem puffVFX, dirtParticles;
+    [SerializeField] private ParticleSystem puffVFX, dirtParticles, puffCollisionVFX;
     [SerializeField] private TrailRenderer trail;
     [SerializeField] private Rigidbody rb;
     private float _y;
@@ -81,7 +87,7 @@ public class PlayerController : MonoBehaviour
 
     public void StopMoving(Vector2 touchPos)
     {
-        if (m_state == State.afk) return;
+        if (m_state == State.afk || m_state == State.idle) return;
         m_state = State.idle;
         animator.SetTrigger("IdleMode");
         dirtParticles.Stop();
@@ -102,12 +108,13 @@ public class PlayerController : MonoBehaviour
         Vector3 deltaAccel = currentAccel - lowPassValue;
         if (deltaAccel.magnitude > jerkThreshold)
         {
+            deviceAccelerationRaw = currentAccel;
             deviceJerk = deltaAccel.normalized;
-            deviceJerk = new Vector3(deviceJerk.x, deviceJerk.z, deviceJerk.y);
+            deviceJerk = new Vector3(deviceJerk.x, deviceJerk.y, deviceJerk.z);
             
             Vector3 worldJerk = Camera.main.transform.TransformDirection(deviceJerk).normalized;
             isDashAvaliable = false;
-            jerkVector = new Vector3(-worldJerk.x, 0, -worldJerk.z);
+            jerkVector = new Vector3(-worldJerk.x, 0, -worldJerk.y);
             dashForce += jerkVector * dashSpeed;
             Invoke("ResetDash", jerkCooldown);
         }
@@ -121,7 +128,7 @@ public class PlayerController : MonoBehaviour
         ProcessDash();
 
         //transform.Translate(currentForce, Space.World);
-        rb.linearVelocity = currentForce + dashForce;
+        rb.linearVelocity = currentForce;
 
         if (dashForce.magnitude > 0.01f ) dashForce *= dashDamp;
         else dashForce = Vector3.zero; 
@@ -185,6 +192,7 @@ public class PlayerController : MonoBehaviour
     public void DisableGoose(){
         m_state = State.afk;
         trail.emitting = false;
+        rb.isKinematic = true;
         dirtParticles.Stop();
         animator.SetTrigger("IdleMode");
         currentForce = Vector3.zero;
@@ -204,8 +212,20 @@ public class PlayerController : MonoBehaviour
         GUI.Label(new Rect(10, yOffset + lvlOffset * 2, 300, 200), "currentForce: " + currentForce, guiStyle);
         GUI.Label(new Rect(10, yOffset + lvlOffset * 3, 300, 200), "current magnitude: " + currentForce.magnitude, guiStyle);
         GUI.Label(new Rect(10, yOffset + lvlOffset * 4, 300, 200), "max allowed magnitude: " + maxSpeed, guiStyle);
-        GUI.Label(new Rect(10, yOffset + lvlOffset * 5, 300, 200), "device dash: " + deviceJerk, guiStyle);
-        GUI.Label(new Rect(10, yOffset + lvlOffset * 6, 300, 200), "dash vector: " + jerkVector, guiStyle);
-        GUI.Label(new Rect(10, yOffset + lvlOffset * 7, 300, 200), "dashForce: " + dashForce, guiStyle);
+        GUI.Label(new Rect(10, yOffset + lvlOffset * 5, 300, 200), "device acc raw: " + deviceAccelerationRaw, guiStyle);
+        GUI.Label(new Rect(10, yOffset + lvlOffset * 6, 300, 200), "device dash: " + deviceJerk, guiStyle);
+        GUI.Label(new Rect(10, yOffset + lvlOffset * 7, 300, 200), "dash vector: " + jerkVector, guiStyle);
+        GUI.Label(new Rect(10, yOffset + lvlOffset * 8, 300, 200), "dashForce: " + dashForce, guiStyle);
+    }
+
+    void OnCollisionEnter(Collision collision)
+    {   
+        if (currentForce.magnitude < minFoceToHitWall) return;
+
+        if (collision.collider.CompareTag(regularWallTag)){
+            puffCollisionVFX.Play();
+            currentForce = currentForce / 3f; 
+            StopMoving(Vector2.zero);
+        }       
     }
 }

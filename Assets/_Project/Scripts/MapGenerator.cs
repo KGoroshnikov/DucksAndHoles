@@ -17,6 +17,8 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private GameObject theHole;
     [SerializeField] private Transform transformHole;
 
+    [SerializeField] private MazeGenerator mazeGenerator;
+
     public static float CalculatePolygonArea(List<Vector2> polygon)
     {
         float area = 0f;
@@ -44,8 +46,23 @@ public class MapGenerator : MonoBehaviour
         }
         return isInside;
     }
-    public void GenerateMap(ARPlane targetPlane)
+    /*
+    public void GenerateMazeLevel(ARPlane _arplane, Vector3 pos)
     {
+        arPlane = _arplane;
+        mazeStartPoint = pos;
+
+    */
+    public void GenerateMap(ARPlane targetPlane, GameObject goose)
+    {
+        mazeGenerator.GenerateMazeLevel(targetPlane, goose.transform.position);
+        
+        SetupVFX(targetPlane, grassVFX, grassAmountPerArea);
+        SetupVFX(targetPlane, glowsVFX, glowsAmountPerArea);
+
+        Instantiate(theHole, transformHole.position, transformHole.rotation);
+
+        return;
         List<Vector2> boundary = new List<Vector2>(targetPlane.boundary);
 
         if (boundary.Count < 3)
@@ -91,11 +108,6 @@ public class MapGenerator : MonoBehaviour
                 spawnedWalls++;
             }
         }
-
-        SetupVFX(targetPlane, grassVFX, grassAmountPerArea);
-        SetupVFX(targetPlane, glowsVFX, glowsAmountPerArea);
-
-        Instantiate(theHole, transformHole.position, transformHole.rotation);
     }
 
     void SetupVFX(ARPlane currentPlane, ParticleSystem particles, int ppa){

@@ -63,7 +63,7 @@ Material:
     - _Spread: 0.2
     - _SrcBlend: 1
     - _Surface: 0
-    - _ZTest: 8
+    - _ZTest: 4
     - _ZWrite: 1
     - _ZWriteControl: 0
     m_Colors:

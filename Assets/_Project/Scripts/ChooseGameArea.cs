@@ -73,6 +73,10 @@ public class ChooseGameArea : MonoBehaviour
         }
     }
 
+    public GameObject GetGoose(){
+        return spawnedGoose;
+    }
+
     public ARPlane GetARPlane(){
         isActive = false;
 
