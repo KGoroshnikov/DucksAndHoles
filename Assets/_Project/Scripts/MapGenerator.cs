@@ -9,7 +9,17 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private int wallCount = 10;
     [SerializeField] private float minRequiredArea = 1.0f;
 
-    private float CalculatePolygonArea(List<Vector2> polygon)
+    [SerializeField] private ParticleSystem grassVFX;
+    [SerializeField] private int grassAmountPerArea;
+    [SerializeField] private ParticleSystem glowsVFX;
+    [SerializeField] private int glowsAmountPerArea;
+
+    [SerializeField] private GameObject theHole;
+    [SerializeField] private Transform transformHole;
+
+    [SerializeField] private MazeGenerator mazeGenerator;
+
+    public static float CalculatePolygonArea(List<Vector2> polygon)
     {
         float area = 0f;
         int j = polygon.Count - 1;
@@ -36,8 +46,23 @@ public class MapGenerator : MonoBehaviour
         }
         return isInside;
     }
-    public void GenerateMap(ARPlane targetPlane)
+    /*
+    public void GenerateMazeLevel(ARPlane _arplane, Vector3 pos)
     {
+        arPlane = _arplane;
+        mazeStartPoint = pos;
+
+    */
+    public void GenerateMap(ARPlane targetPlane, GameObject goose)
+    {
+        mazeGenerator.GenerateMazeLevel(targetPlane, goose.transform.position);
+        
+        SetupVFX(targetPlane, grassVFX, grassAmountPerArea);
+        SetupVFX(targetPlane, glowsVFX, glowsAmountPerArea);
+
+        Instantiate(theHole, transformHole.position, transformHole.rotation);
+
+        return;
         List<Vector2> boundary = new List<Vector2>(targetPlane.boundary);
 
         if (boundary.Count < 3)
@@ -83,6 +108,20 @@ public class MapGenerator : MonoBehaviour
                 spawnedWalls++;
             }
         }
-        Debug.Log("Сгенерировано стен: " + spawnedWalls);
+    }
+
+    void SetupVFX(ARPlane currentPlane, ParticleSystem particles, int ppa){
+        MeshFilter meshFilter = currentPlane.GetComponent<MeshFilter>();
+        Mesh planeMesh = meshFilter.mesh;
+        var shape = particles.shape;
+        var mainModule = particles.main;
+        shape.shapeType = ParticleSystemShapeType.Mesh;
+        shape.mesh = planeMesh;
+        List<Vector2> boundary = new List<Vector2>(currentPlane.boundary);
+        float area = MapGenerator.CalculatePolygonArea(boundary);
+        mainModule.maxParticles = (int)(area * ppa);
+        particles.transform.position = currentPlane.transform.position + new Vector3(0, 0.005f, 0);
+        particles.transform.rotation = currentPlane.transform.rotation;
+        particles.Play();
     }
 }
