@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class Funcs : MonoBehaviour
 {
+    public const float yOffset = 0.0025f;
     public delegate void CallbackFunc();
 
     public static float SmoothLerp(float t){

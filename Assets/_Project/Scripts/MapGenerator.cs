@@ -55,12 +55,12 @@ public class MapGenerator : MonoBehaviour
     */
     public void GenerateMap(ARPlane targetPlane, GameObject goose)
     {
-        mazeGenerator.GenerateMazeLevel(targetPlane, goose.transform.position);
+        mazeGenerator.GenerateMazeLevel(targetPlane, goose.transform);
         
         SetupVFX(targetPlane, grassVFX, grassAmountPerArea);
         SetupVFX(targetPlane, glowsVFX, glowsAmountPerArea);
 
-        Instantiate(theHole, transformHole.position, transformHole.rotation);
+        //Instantiate(theHole, transformHole.position, transformHole.rotation);
 
         return;
         List<Vector2> boundary = new List<Vector2>(targetPlane.boundary);

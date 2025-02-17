@@ -18,11 +18,12 @@ Material:
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 3000
+  m_CustomRenderQueue: 2500
   stringTagMap:
     RenderType: Transparent
   disabledShaderPasses:
   - MOTIONVECTORS
+  - SHADOWCASTER
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
@@ -53,17 +54,17 @@ Material:
     - _AlphaToMask: 0
     - _Blend: 0
     - _Brightness: 2.64
-    - _CastShadows: 1
+    - _CastShadows: 0
     - _Cull: 2
     - _DstBlend: 10
     - _GooseTiles: 10
-    - _LineWidth: 0.01
+    - _LineWidth: 0.003
     - _MaskRadius: 0
     - _QueueControl: 1
     - _QueueOffset: -50
     - _SrcBlend: 5
     - _Surface: 1
-    - _TexTiling: 1.18
+    - _TexTiling: 2
     - _ZTest: 4
     - _ZWrite: 1
     - _ZWriteControl: 1
