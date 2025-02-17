@@ -34,7 +34,12 @@ public class MazeGenerator : MonoBehaviour
     private int generationAttempts = 0;
     private int maxGenerationAttempts = 10;
 
+    [SerializeField] private FogOfWarManager fogOfWarManager;
+    private Transform goose;
+
     [SerializeField] private GameObject text;
+    [SerializeField] private GameObject hole;
+    [SerializeField] private GameObject slime;
 
     public struct RoomDoorInfo {
         public Vector2Int insideCell;
@@ -50,6 +55,7 @@ public class MazeGenerator : MonoBehaviour
         public float pathFraction = 0.5f;
         public int roomWidth = 2;
         public int roomHeight = 2;
+        public int maxRoomPathTiles;
     }
 
     class MazeCell
@@ -62,10 +68,11 @@ public class MazeGenerator : MonoBehaviour
         public bool isRoom = false;
     }
 
-    public void GenerateMazeLevel(ARPlane _arplane, Vector3 pos)
+    public void GenerateMazeLevel(ARPlane _arplane, Transform _goose)
     {
         arPlane = _arplane;
-        mazeStartPoint = pos;
+        mazeStartPoint = _goose.position;
+        goose = _goose;
 
         if (!CheckARPlaneSize())
         {
@@ -86,18 +93,7 @@ public class MazeGenerator : MonoBehaviour
             return;
         }
 
-        /*Vector3 arPlaneBottomLeft = arPlane.transform.position - new Vector3(arPlane.size.x, 0, arPlane.size.y) / 2f;
-        Vector3 offset = mazeStartPoint - arPlaneBottomLeft;
-        int startX = Mathf.FloorToInt(offset.x / cellSize);
-        int startY = Mathf.FloorToInt(offset.z / cellSize);
-        autoStartCellIndex = new Vector2Int(startX, startY);
-        autoStartCellIndex.x = Mathf.Clamp(autoStartCellIndex.x, 0, gridWidth - 1);
-        autoStartCellIndex.y = Mathf.Clamp(autoStartCellIndex.y, 0, gridHeight - 1);*/
-
-        //autoStartCellIndex = new Vector2Int(gridWidth / 2, gridHeight / 2);
-
         Vector3 arPlaneBottomLeft = arPlane.transform.position - new Vector3(arPlane.size.x, 0, arPlane.size.y) / 2f;
-
         float desiredOriginX = mazeStartPoint.x - (gridWidth / 2f) * cellSize;
         float desiredOriginZ = mazeStartPoint.z - (gridHeight / 2f) * cellSize;
         float planeLeft = arPlaneBottomLeft.x;
@@ -148,7 +144,32 @@ public class MazeGenerator : MonoBehaviour
         BuildMazeWalls();
         Debug.Log("Success! Length: " + mainPath.Count);
 
-        ShowCellID();
+        //ShowCellID();
+
+        InitFog();
+        SpawnHoles();
+        SpawnSlimes(3);
+    }
+
+    void SpawnSlimes(int amount){
+        for(int i = 0; i < amount; i++){
+            for(int att = 0; att < 10; att++){
+                Vector2Int cell = new Vector2Int(Random.Range(0, gridWidth), Random.Range(0, gridHeight));
+                if (mainPath.Contains(cell)) continue;
+                Instantiate(slime, GridToWorldPosition(cell), Quaternion.identity);
+                break;
+            }
+        }
+    }
+
+    void SpawnHoles(){
+        Instantiate(hole, GridToWorldPosition(finishCell) + new Vector3(0, 0.005f, 0), Quaternion.Euler(90, 0, 0));
+    }
+
+    void InitFog(){
+        Vector3 leftBottom = GridToWorldPosition(new Vector2(0, 0));
+        Vector3 rTop = GridToWorldPosition(new Vector2(gridWidth - 1, gridHeight - 1));
+        fogOfWarManager.SetupFog(goose, (leftBottom + rTop)/2, new Vector2(gridWidth, gridHeight));
     }
 
     void InitGrid()
@@ -164,6 +185,7 @@ public class MazeGenerator : MonoBehaviour
     }
 
     void ShowCellID(){
+
         for (int x = 0; x < gridWidth; x++)
         {
             for (int y = 0; y < gridHeight; y++)
@@ -345,7 +367,6 @@ public class MazeGenerator : MonoBehaviour
         }
         return furthest;
     }
-
     void InsertRoom(RoomInfo room)
     {
         if (mainPath == null || mainPath.Count == 0)
@@ -364,6 +385,60 @@ public class MazeGenerator : MonoBehaviour
         if (roomStartX + roomWidthCells > gridWidth) roomStartX = gridWidth - roomWidthCells;
         if (roomStartY + roomHeightCells > gridHeight) roomStartY = gridHeight - roomHeightCells;
 
+        int shiftRange = 3;
+        int bestScore = int.MaxValue;
+        int bestStartX = roomStartX;
+        int bestStartY = roomStartY;
+        List<int> bestIdsInsideRoom = null;
+
+        for (int dx = -shiftRange; dx <= shiftRange; dx++)
+        {
+            for (int dy = -shiftRange; dy <= shiftRange; dy++)
+            {
+                int candidateX = roomStartX + dx;
+                int candidateY = roomStartY + dy;
+
+                candidateX = Mathf.Clamp(candidateX, 0, gridWidth - roomWidthCells);
+                candidateY = Mathf.Clamp(candidateY, 0, gridHeight - roomHeightCells);
+
+                List<int> candidateIds = new List<int>();
+                for (int i = 0; i < mainPath.Count; i++)
+                {
+                    Vector2Int cell = mainPath[i];
+                    if (cell.x >= candidateX && cell.x < candidateX + roomWidthCells &&
+                        cell.y >= candidateY && cell.y < candidateY + roomHeightCells)
+                    {
+                        candidateIds.Add(i);
+                    }
+                }
+                int score = 0;
+
+                if (candidateIds.Contains(0)) score += 1000;
+                if (candidateIds.Contains(mainPath.Count - 1)) score += 1000;
+
+                if (candidateIds.Count > room.maxRoomPathTiles)
+                    score += (candidateIds.Count - room.maxRoomPathTiles) * 100;
+
+                if (candidateIds.Count == 0)
+                    score += 500;
+
+                if (score < bestScore)
+                {
+                    bestScore = score;
+                    bestStartX = candidateX;
+                    bestStartY = candidateY;
+                    bestIdsInsideRoom = candidateIds;
+                }
+            }
+        }
+        roomStartX = bestStartX;
+        roomStartY = bestStartY;
+        if (bestIdsInsideRoom == null || bestIdsInsideRoom.Count == 0)
+        {
+            bestIdsInsideRoom = new List<int> { targetIndex };
+            grid[targetCell.x, targetCell.y].isRoom = true;
+        }
+
         for (int x = roomStartX; x < roomStartX + roomWidthCells; x++)
         {
             for (int y = roomStartY; y < roomStartY + roomHeightCells; y++)
@@ -376,36 +451,20 @@ public class MazeGenerator : MonoBehaviour
             }
         }
 
-        List<int> idsInsideRoom = new List<int>();
-        for (int i = 0; i < mainPath.Count; i++)
-        {
-            Vector2Int cell = mainPath[i];
-            if (cell.x >= roomStartX && cell.x < roomStartX + roomWidthCells &&
-                cell.y >= roomStartY && cell.y < roomStartY + roomHeightCells)
-            {
-                idsInsideRoom.Add(i);
-            }
-        }
-        if (idsInsideRoom.Count == 0)
-        {
-            idsInsideRoom.Add(targetIndex);
-            grid[targetCell.x, targetCell.y].isRoom = true;
-        }
-
         RoomDoorInfo entranceDoor;
-        entranceDoor.insideCell =  mainPath[idsInsideRoom[0]];
-        entranceDoor.outsideCell = idsInsideRoom[0] > 0 ? mainPath[idsInsideRoom[0] - 1] : entranceDoor.insideCell;
+        entranceDoor.insideCell = mainPath[bestIdsInsideRoom[0]];
+        entranceDoor.outsideCell = bestIdsInsideRoom[0] > 0 ? mainPath[bestIdsInsideRoom[0] - 1] : entranceDoor.insideCell;
         entranceDoor.worldInside = GridToWorldPosition(entranceDoor.insideCell);
         entranceDoor.worldOutside = GridToWorldPosition(entranceDoor.outsideCell);
-        Debug.Log("Enterance inside " + entranceDoor.insideCell + ", outside " + entranceDoor.outsideCell);
+        Debug.Log("Entrance: inside " + entranceDoor.insideCell + ", outside " + entranceDoor.outsideCell);
 
         RoomDoorInfo exitDoor;
-        exitDoor.insideCell = mainPath[idsInsideRoom[idsInsideRoom.Count - 1]];
-        exitDoor.outsideCell = (idsInsideRoom[idsInsideRoom.Count - 1] < mainPath.Count - 1) ?
-                                    mainPath[idsInsideRoom[idsInsideRoom.Count - 1] + 1] : exitDoor.insideCell;
+        exitDoor.insideCell = mainPath[bestIdsInsideRoom[bestIdsInsideRoom.Count - 1]];
+        exitDoor.outsideCell = (bestIdsInsideRoom[bestIdsInsideRoom.Count - 1] < mainPath.Count - 1) ?
+                                mainPath[bestIdsInsideRoom[bestIdsInsideRoom.Count - 1] + 1] : exitDoor.insideCell;
         exitDoor.worldInside = GridToWorldPosition(exitDoor.insideCell);
         exitDoor.worldOutside = GridToWorldPosition(exitDoor.outsideCell);
-        Debug.Log("Exit inside " + exitDoor.insideCell + ", outside " + exitDoor.outsideCell);
+        Debug.Log("Exit: inside " + exitDoor.insideCell + ", outside " + exitDoor.outsideCell);
 
         Vector3 roomCenter = GridToWorldPosition(new Vector2Int(roomStartX + roomWidthCells / 2, roomStartY + roomHeightCells / 2));
         GameObject roomObj = Instantiate(room.roomPrefab, roomCenter, Quaternion.identity, transform);
@@ -441,7 +500,7 @@ public class MazeGenerator : MonoBehaviour
     {
         GameObject wallParent = new GameObject("MazeWalls");
         wallParent.transform.parent = transform;
-
+        float yOffset = Funcs.yOffset;
         for (int x = 0; x < gridWidth; x++)
         {
             for (int y = 0; y < gridHeight; y++)
@@ -453,13 +512,13 @@ public class MazeGenerator : MonoBehaviour
 
                 if (grid[x, y].wallRight)
                 {
-                    Vector3 pos = cellPos + new Vector3(cellSize / 2f, 0, 0);
+                    Vector3 pos = cellPos + new Vector3(cellSize / 2f, yOffset, 0);
                     GameObject wall = Instantiate(wallPrefab, pos, Quaternion.Euler(0, 90, 0), wallParent.transform);
                     SetupWall(wall);
                 }
                 if (grid[x, y].wallTop)
                 {
-                    Vector3 pos = cellPos + new Vector3(0, 0, cellSize / 2f);
+                    Vector3 pos = cellPos + new Vector3(0, yOffset, cellSize / 2f);
                     GameObject wall = Instantiate(wallPrefab, pos, Quaternion.identity, wallParent.transform);
                     SetupWall(wall);
                 }
@@ -471,7 +530,7 @@ public class MazeGenerator : MonoBehaviour
             if (!grid[x, y].isRoom && grid[x, y].wallLeft)
             {
                 Vector3 cellPos = GridToWorldPosition(new Vector2Int(x, y));
-                Vector3 pos = cellPos + new Vector3(-cellSize / 2f, 0, 0);
+                Vector3 pos = cellPos + new Vector3(-cellSize / 2f, yOffset, 0);
                 GameObject wall = Instantiate(wallPrefab, pos, Quaternion.Euler(0, 90, 0), wallParent.transform);
                 SetupWall(wall);
             }
@@ -482,7 +541,7 @@ public class MazeGenerator : MonoBehaviour
             if (!grid[x, y].isRoom && grid[x, y].wallBottom)
             {
                 Vector3 cellPos = GridToWorldPosition(new Vector2Int(x, y));
-                Vector3 pos = cellPos + new Vector3(0, 0, -cellSize / 2f);
+                Vector3 pos = cellPos + new Vector3(0, yOffset, -cellSize / 2f);
                 GameObject wall = Instantiate(wallPrefab, pos, Quaternion.identity, wallParent.transform);
                 SetupWall(wall);
             }
@@ -492,7 +551,7 @@ public class MazeGenerator : MonoBehaviour
         wall.transform.localScale = new Vector3(wall.transform.localScale.x, Random.Range(wallHeight.x, wallHeight.y), wall.transform.localScale.z);
     }
 
-    public Vector3 GridToWorldPosition(Vector2Int gridPos)
+    public Vector3 GridToWorldPosition(Vector2 gridPos)
     {
         Vector3 mazeOrigin = mazeStartPoint - new Vector3(autoStartCellIndex.x * cellSize, 0, autoStartCellIndex.y * cellSize);
         return mazeOrigin + new Vector3(gridPos.x * cellSize, 0, gridPos.y * cellSize);

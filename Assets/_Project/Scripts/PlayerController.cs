@@ -46,6 +46,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private ParticleSystem puffVFX, dirtParticles, puffCollisionVFX;
     [SerializeField] private TrailRenderer trail;
     [SerializeField] private Rigidbody rb;
+    [SerializeField] private GameObject mainFogTrail;
     private float _y;
 
     void Start()
@@ -59,6 +60,8 @@ public class PlayerController : MonoBehaviour
         m_state = State.idle;
         trail.emitting = true;
         _y = _gameY + 0.01f;
+
+        mainFogTrail.SetActive(true);
     }
 
     void OnEnable(){
@@ -191,6 +194,7 @@ public class PlayerController : MonoBehaviour
 
     public void DisableGoose(){
         m_state = State.afk;
+        mainFogTrail.transform.SetParent(null);
         trail.emitting = false;
         rb.isKinematic = true;
         dirtParticles.Stop();
