@@ -53,16 +53,19 @@ public class MapGenerator : MonoBehaviour
         mazeStartPoint = pos;
 
     */
-    public void GenerateMap(ARPlane targetPlane, GameObject goose)
+    public bool GenerateMap(ARPlane targetPlane, GameObject goose)
     {
-        mazeGenerator.GenerateMazeLevel(targetPlane, goose.transform);
+        bool mazeGenerated = mazeGenerator.GenerateMazeLevel(targetPlane, goose.transform);
+
+        if (!mazeGenerated) return false;
         
         SetupVFX(targetPlane, grassVFX, grassAmountPerArea);
         SetupVFX(targetPlane, glowsVFX, glowsAmountPerArea);
 
+        return true;
+        /*
         //Instantiate(theHole, transformHole.position, transformHole.rotation);
 
-        return;
         List<Vector2> boundary = new List<Vector2>(targetPlane.boundary);
 
         if (boundary.Count < 3)
@@ -107,7 +110,7 @@ public class MapGenerator : MonoBehaviour
                 Instantiate(wallPrefab, worldPoint, Quaternion.identity);
                 spawnedWalls++;
             }
-        }
+        }*/
     }
 
     void SetupVFX(ARPlane currentPlane, ParticleSystem particles, int ppa){

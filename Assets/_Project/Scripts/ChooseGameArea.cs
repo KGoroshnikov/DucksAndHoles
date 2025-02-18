@@ -78,6 +78,10 @@ public class ChooseGameArea : MonoBehaviour
     }
 
     public ARPlane GetARPlane(){
+        return currentPlane;
+    }
+
+    public void SetupGame(){
         isActive = false;
 
         MeshFilter meshFilter = currentPlane.GetComponent<MeshFilter>();
@@ -89,6 +93,5 @@ public class ChooseGameArea : MonoBehaviour
         }
         spawnedGoose.GetComponent<PlayerController>().ActivateGoose(currentPlane.transform.position.y);
 
-        return currentPlane;
     }
 }
