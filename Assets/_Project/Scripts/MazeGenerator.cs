@@ -21,6 +21,12 @@ public class MazeGenerator : MonoBehaviour
     [Header("Rooms")]
     [SerializeField] private List<RoomInfo> customRooms = new List<RoomInfo>();
 
+    [Header("VFX")]
+    [SerializeField] private ParticleSystem grassVFX;
+    [SerializeField] private int grassAmountPerArea;
+    [SerializeField] private ParticleSystem glowsVFX;
+    [SerializeField] private int glowsAmountPerArea;
+
     private MazeCell[,] grid;
     private int gridWidth;
     private int gridHeight;
@@ -68,7 +74,7 @@ public class MazeGenerator : MonoBehaviour
         public bool isRoom = false;
     }
 
-    public void GenerateMazeLevel(ARPlane _arplane, Transform _goose)
+    public bool GenerateMazeLevel(ARPlane _arplane, Transform _goose)
     {
         arPlane = _arplane;
         mazeStartPoint = _goose.position;
@@ -77,7 +83,7 @@ public class MazeGenerator : MonoBehaviour
         if (!CheckARPlaneSize())
         {
             Debug.LogError("ARPlane too smoll");
-            return;
+            return false;
         }
 
         Vector2 planeSize = arPlane.size;
@@ -90,7 +96,7 @@ public class MazeGenerator : MonoBehaviour
         if (gridWidth * gridHeight < minPathLength)
         {
             Debug.LogError("ARPlane too smoll for min length");
-            return;
+            return false;
         }
 
         Vector3 arPlaneBottomLeft = arPlane.transform.position - new Vector3(arPlane.size.x, 0, arPlane.size.y) / 2f;
@@ -133,7 +139,7 @@ public class MazeGenerator : MonoBehaviour
         if (!validMaze)
         {
             Debug.LogError("I cant generate a maze: " + maxGenerationAttempts + " tries.");
-            return;
+            return false;
         }
 
         foreach (RoomInfo room in customRooms)
@@ -149,6 +155,26 @@ public class MazeGenerator : MonoBehaviour
         InitFog();
         SpawnHoles();
         SpawnSlimes(3);
+
+        SetupVFX(arPlane, grassVFX, grassAmountPerArea);
+        SetupVFX(arPlane, glowsVFX, glowsAmountPerArea);
+
+        return true;
+    }
+
+    void SetupVFX(ARPlane currentPlane, ParticleSystem particles, int ppa){
+        MeshFilter meshFilter = currentPlane.GetComponent<MeshFilter>();
+        Mesh planeMesh = meshFilter.mesh;
+        var shape = particles.shape;
+        var mainModule = particles.main;
+        shape.shapeType = ParticleSystemShapeType.Mesh;
+        shape.mesh = planeMesh;
+        List<Vector2> boundary = new List<Vector2>(currentPlane.boundary);
+        float area = MapGenerator.CalculatePolygonArea(boundary);
+        mainModule.maxParticles = (int)(area * ppa);
+        particles.transform.position = currentPlane.transform.position + new Vector3(0, 0.005f, 0);
+        particles.transform.rotation = currentPlane.transform.rotation;
+        particles.Play();
     }
 
     void SpawnSlimes(int amount){
