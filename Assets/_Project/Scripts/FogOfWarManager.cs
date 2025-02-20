@@ -15,7 +15,12 @@ public class FogOfWarManager : MonoBehaviour
 
     private bool working;
 
+    public void HideFog(){
+        mainFog.SetActive(false);
+    }
+
     public void SetupFog(Transform _goose, Vector3 center, Vector2 size){
+        mainFog.SetActive(true);
         goose = _goose;
         
         //particles.transform.position = center;

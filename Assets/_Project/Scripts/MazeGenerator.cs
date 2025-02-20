@@ -15,6 +15,14 @@ public class MazeGenerator : MonoBehaviour
     [SerializeField] private Vector2 wallHeight;
     [SerializeField] private int maxMazeCellsX = 10;
     [SerializeField] private int maxMazeCellsY = 10;
+    [SerializeField] private int slimeAmount;
+
+    [Header("Special Settings")]
+    [SerializeField] private StartCellType startCellType;
+    [SerializeField] private bool isLvlPath;
+    public enum StartCellType{
+        center, zero
+    }
 
     private Vector3 mazeStartPoint;
 
@@ -39,6 +47,7 @@ public class MazeGenerator : MonoBehaviour
 
     private int generationAttempts = 0;
     private int maxGenerationAttempts = 10;
+    private int cellOffset;
 
     [SerializeField] private FogOfWarManager fogOfWarManager;
     private Transform goose;
@@ -74,6 +83,9 @@ public class MazeGenerator : MonoBehaviour
         public bool isRoom = false;
     }
 
+    private List<GameObject> spawnedObjects = new List<GameObject>();
+    private LvlScriptableObject lvlData;
+
     public bool GenerateMazeLevel(ARPlane _arplane, Transform _goose)
     {
         arPlane = _arplane;
@@ -100,8 +112,15 @@ public class MazeGenerator : MonoBehaviour
         }
 
         Vector3 arPlaneBottomLeft = arPlane.transform.position - new Vector3(arPlane.size.x, 0, arPlane.size.y) / 2f;
-        float desiredOriginX = mazeStartPoint.x - (gridWidth / 2f) * cellSize;
-        float desiredOriginZ = mazeStartPoint.z - (gridHeight / 2f) * cellSize;
+        float desiredOriginX = 0, desiredOriginZ = 0;
+        if (startCellType == StartCellType.center){
+            desiredOriginX = mazeStartPoint.x - (gridWidth / 2f) * cellSize;
+            desiredOriginZ = mazeStartPoint.z - (gridHeight / 2f) * cellSize;
+        }
+        else if (startCellType == StartCellType.zero){
+            desiredOriginX = mazeStartPoint.x;
+            desiredOriginZ = mazeStartPoint.z;
+        }
         float planeLeft = arPlaneBottomLeft.x;
         float planeRight = arPlaneBottomLeft.x + arPlane.size.x;
         float planeBottom = arPlaneBottomLeft.z;
@@ -115,9 +134,9 @@ public class MazeGenerator : MonoBehaviour
         int autoStartX = Mathf.RoundToInt((mazeStartPoint.x - chosenOriginX) / cellSize);
         int autoStartY = Mathf.RoundToInt((mazeStartPoint.z - chosenOriginZ) / cellSize);
         autoStartCellIndex = new Vector2Int(Mathf.Clamp(autoStartX, 0, gridWidth - 1), Mathf.Clamp(autoStartY, 0, gridHeight - 1));
-        Debug.Log(autoStartCellIndex + " wh: " + gridWidth + " " + gridHeight);
 
-
+        Vector2Int cellIndexOffset = new Vector2Int(0, 0);
+        cellOffset = 0;
         generationAttempts = 0;
         bool validMaze = false;
         while (!validMaze && generationAttempts < maxGenerationAttempts)
@@ -126,14 +145,16 @@ public class MazeGenerator : MonoBehaviour
             InitGrid();
             GenerateMazeDFS();
 
-            startCell = autoStartCellIndex;
+            startCell = autoStartCellIndex + cellIndexOffset;
             finishCell = GetFurthestCellFrom(startCell);
             mainPath = FindMainPathBFS(startCell, finishCell);
 
             if (mainPath != null && mainPath.Count >= minPathLength) 
                 validMaze = true;
-            else
+            else{
+                cellIndexOffset = SpiralOffset(cellIndexOffset, autoStartCellIndex, new Vector2Int(gridWidth, gridHeight));
                 Debug.Log("Try " + generationAttempts + ": Length " + (mainPath != null ? mainPath.Count.ToString() : "null") + " Regeneration...");
+            }
         }
 
         if (!validMaze)
@@ -154,12 +175,70 @@ public class MazeGenerator : MonoBehaviour
 
         InitFog();
         SpawnHoles();
-        SpawnSlimes(3);
+        SpawnSlimes(slimeAmount);
 
         SetupVFX(arPlane, grassVFX, grassAmountPerArea);
         SetupVFX(arPlane, glowsVFX, glowsAmountPerArea);
 
         return true;
+    }
+
+    public void SetupLvlData(LvlScriptableObject lvl){
+        lvlData = lvl;
+        startCellType = StartCellType.center;
+        isLvlPath = false;
+
+        minPathLength = lvlData.minPathLength;
+        slimeAmount = lvlData.slimeAmount;
+        maxMazeCellsX = lvlData.maxMazeCellsX;
+        maxMazeCellsY = lvlData.maxMazeCellsY;
+        customRooms = lvlData.customRooms;
+    }
+
+    public void DestroyLevel(){
+        for(int i = 0; i < spawnedObjects.Count; i++){
+            Destroy(spawnedObjects[i]);
+        }
+    }
+
+    Vector2Int SpiralOffset(Vector2Int cellIndexOffset, Vector2Int startCellIndex, Vector2Int gridSize)
+    {
+        Vector2Int candidate;
+        if (cellOffset == 0)
+        {
+            cellOffset = 1;
+            candidate = new Vector2Int(cellOffset, 0);
+        }
+        else if (cellIndexOffset.x != 0)
+        {
+            if (cellIndexOffset.x == cellOffset) candidate = new Vector2Int(0, -cellOffset);
+            else candidate = new Vector2Int(0, cellOffset);
+        }
+        else
+        {
+            if (cellIndexOffset.y == -cellOffset) candidate = new Vector2Int(-cellOffset, 0);
+            else
+            {
+                cellOffset++;
+                candidate = new Vector2Int(cellOffset, 0);
+            }
+        }
+
+        Vector2Int newStart = startCellIndex + candidate;
+        bool inBounds = (newStart.x >= 0 && newStart.x < gridSize.x && newStart.y >= 0 && newStart.y < gridSize.y);
+        
+        Debug.Log("Candidate: " + candidate + " inBounds: " + inBounds); 
+        if (!inBounds)
+        {
+            Vector2Int nextCandidate = SpiralOffset(candidate, startCellIndex, gridSize);
+            Debug.Log("nextCandidate: " + nextCandidate + " candidate: " + candidate);
+            if (nextCandidate == candidate)
+                return candidate;
+            else
+                return nextCandidate;
+        }
+        
+        return candidate;
     }
 
     void SetupVFX(ARPlane currentPlane, ParticleSystem particles, int ppa){
@@ -178,21 +257,29 @@ public class MazeGenerator : MonoBehaviour
     }
 
     void SpawnSlimes(int amount){
+        if (isLvlPath) return;
         for(int i = 0; i < amount; i++){
             for(int att = 0; att < 10; att++){
                 Vector2Int cell = new Vector2Int(Random.Range(0, gridWidth), Random.Range(0, gridHeight));
                 if (mainPath.Contains(cell)) continue;
-                Instantiate(slime, GridToWorldPosition(cell), Quaternion.identity);
+                GameObject mob = Instantiate(slime, GridToWorldPosition(cell), Quaternion.identity);
+                spawnedObjects.Add(mob);
                 break;
             }
         }
     }
 
     void SpawnHoles(){
-        Instantiate(hole, GridToWorldPosition(finishCell) + new Vector3(0, 0.005f, 0), Quaternion.Euler(90, 0, 0));
+        if (isLvlPath) return;
+        GameObject newHole = Instantiate(hole, GridToWorldPosition(finishCell) + new Vector3(0, 0.005f, 0), Quaternion.Euler(90, 0, 0));
+        spawnedObjects.Add(newHole);
     }
 
     void InitFog(){
+        if (isLvlPath){
+            fogOfWarManager.HideFog();
+            return;
+        }
         Vector3 leftBottom = GridToWorldPosition(new Vector2(0, 0));
         Vector3 rTop = GridToWorldPosition(new Vector2(gridWidth - 1, gridHeight - 1));
         fogOfWarManager.SetupFog(goose, (leftBottom + rTop)/2, new Vector2(gridWidth, gridHeight));
@@ -217,6 +304,7 @@ public class MazeGenerator : MonoBehaviour
             for (int y = 0; y < gridHeight; y++)
             {
                 GameObject obj = Instantiate(text, GridToWorldPosition(new Vector2Int(x, y)) + new Vector3(0, .15f, 0), Quaternion.identity);
+                spawnedObjects.Add(obj);
                 obj.GetComponent<TMP_Text>().text = new Vector2Int(x, y) + "";
                 if (mainPath.Contains(new Vector2Int(x, y)))
                     obj.GetComponent<TMP_Text>().color = Color.blue;
@@ -494,11 +582,12 @@ public class MazeGenerator : MonoBehaviour
 
         Vector3 roomCenter = GridToWorldPosition(new Vector2Int(roomStartX + roomWidthCells / 2, roomStartY + roomHeightCells / 2));
         GameObject roomObj = Instantiate(room.roomPrefab, roomCenter, Quaternion.identity, transform);
+        spawnedObjects.Add(roomObj);
 
         List<RoomDoorInfo> roomDoorInfos = new List<RoomDoorInfo>();
         roomDoorInfos.Add(entranceDoor);
         roomDoorInfos.Add(exitDoor);
-        roomObj.GetComponent<Room>().SetupRoom(roomDoorInfos);
+        roomObj.GetComponent<Room>().SetupRoom(roomDoorInfos, this);
     }
 
     void AdjustAdjacentWallsToRooms()
@@ -575,6 +664,7 @@ public class MazeGenerator : MonoBehaviour
     }
     void SetupWall(GameObject wall){
         wall.transform.localScale = new Vector3(wall.transform.localScale.x, Random.Range(wallHeight.x, wallHeight.y), wall.transform.localScale.z);
+        spawnedObjects.Add(wall);
     }
 
     public Vector3 GridToWorldPosition(Vector2 gridPos)
@@ -591,5 +681,18 @@ public class MazeGenerator : MonoBehaviour
             return false;
 
         return true;
+    }
+
+    public List<Vector3> GetPosForLvlPath(){
+        //float distToFirst = Vector3.Distance(goose.position, GridToWorldPosition(new Vector2Int(0, 0)));
+        //float distToLast = Vector3.Distance(goose.position, GridToWorldPosition(new Vector2Int(gridWidth - 1, gridHeight - 1)));
+        //return (distToFirst <= distToLast) ? GridToWorldPosition(new Vector2Int(0, 0)) : GridToWorldPosition(new Vector2Int(gridWidth - 1, gridHeight - 1));
+        List<Vector3> firstAndLastPoses = new List<Vector3>();
+        firstAndLastPoses.Add(GridToWorldPosition(new Vector2Int(0, 0)));
+        firstAndLastPoses.Add(GridToWorldPosition(new Vector2Int(gridWidth - 1, gridHeight - 1)));
+        return firstAndLastPoses;
+    }
+    public Transform getGoose(){
+        return goose;
     }
 }

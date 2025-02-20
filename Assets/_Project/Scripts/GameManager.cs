@@ -3,6 +3,9 @@ using UnityEngine.XR.ARFoundation;
 
 public class GameManager : MonoBehaviour
 {
+    [Header("LVLs")]
+    [SerializeField] private LvlScriptableObject[] AllLvls;
+
     [Header("Base")]
     [SerializeField] private States gameStates;
 
@@ -13,18 +16,27 @@ public class GameManager : MonoBehaviour
     [SerializeField] private ChooseGameArea chooseGameArea;
     //[SerializeField] private MapGenerator mapGenerator;
     [SerializeField] private MazeGenerator mazeGenerator;
+    [SerializeField] private LvlChooser lvlChooser;
 
     public enum States{
         scanning, playing
     }
     
     public void RoomIsScanned(){
-        //mapGenerator.GenerateMap(chooseGameArea.GetARPlane(), chooseGameArea.GetGoose());
         bool mazeGenerated = mazeGenerator.GenerateMazeLevel(chooseGameArea.GetARPlane(), chooseGameArea.GetGoose().transform);
+        lvlChooser.Init(chooseGameArea.GetGoose().transform);
         if (!mazeGenerated) return;
         chooseGameArea.SetupGame();
         uiChoose.SetActive(false);
         uiGame.SetActive(true);
         arPlaneManager.requestedDetectionMode = UnityEngine.XR.ARSubsystems.PlaneDetectionMode.None;
+    }
+
+    public void GenerateLvl(int lvl){
+        mazeGenerator.DestroyLevel();
+
+        mazeGenerator.SetupLvlData(AllLvls[lvl]);
+
+        bool mazeGenerated = mazeGenerator.GenerateMazeLevel(chooseGameArea.GetARPlane(), chooseGameArea.GetGoose().transform);
     }
 }

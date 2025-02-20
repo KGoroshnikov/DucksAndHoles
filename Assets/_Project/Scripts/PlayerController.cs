@@ -128,7 +128,7 @@ public class PlayerController : MonoBehaviour
     {
         if (m_state == State.afk) return;
 
-        ProcessDash();
+        //ProcessDash();
 
         //transform.Translate(currentForce, Space.World);
         rb.linearVelocity = currentForce;

@@ -33,7 +33,7 @@ public class MoveObjects : MonoBehaviour
         }
     }
 
-    public void AddObjToMove(Transform _obj, float _timeToMove, Vector3 _endpos, Quaternion _endrot, Funcs.CallbackFunc _callback){
+    public void AddObjToMove(Transform _obj, float _timeToMove, Vector3 _endpos, Quaternion _endrot, Funcs.CallbackFunc _callback = null){
         obj newObj = new obj();
         newObj.m_obj = _obj;
         newObj.startPos = _obj.position;

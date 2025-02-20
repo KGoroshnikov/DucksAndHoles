@@ -4,7 +4,7 @@ using UnityEngine;
 public class Room : MonoBehaviour
 {
     [SerializeField] private GameObject[] walls;
-    public virtual void SetupRoom(List<MazeGenerator.RoomDoorInfo> roomDoorInfos){
+    public virtual void SetupRoom(List<MazeGenerator.RoomDoorInfo> roomDoorInfos, MazeGenerator mazeGenerator = null){
         for(int i = 0; i < roomDoorInfos.Count; i++){
             Vector3 mid = (roomDoorInfos[i].worldInside + roomDoorInfos[i].worldOutside) / 2;
 
