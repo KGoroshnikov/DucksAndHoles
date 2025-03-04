@@ -29,14 +29,28 @@ public class ChooseGameArea : MonoBehaviour
 
     void OnEnable(){
         planeMat.SetFloat("_MaskRadius", 0);
-        planeMat.SetVector("_GoosePos", Vector3.zero);
+        //planeMat.SetFloat("_GameStage", 0);
+        //planeMat.SetFloat("_SmoothDist", 4.5f);
+        //planeMat.SetVector("_GoosePos", Vector3.zero);
+        for(int i = 0; i < 4; i++) planeMat.SetVector("_P" + (i + 1), Vector2.zero);
         //phoneInputData.OnStartTouch += Tapped;
     }
-     void OnDisable(){
+    void OnDisable(){
         planeMat.SetFloat("_MaskRadius", 0);
-        planeMat.SetVector("_GoosePos", Vector3.zero);
+        //planeMat.SetFloat("_GameStage", 0);
+        //planeMat.SetFloat("_SmoothDist", 4.5f);
+        //planeMat.SetVector("_GoosePos", Vector3.zero);
+        for(int i = 0; i < 4; i++) planeMat.SetVector("_P" + (i + 1), Vector2.zero);
         //phoneInputData.OnStartTouch -= Tapped;
     }
+
+    public void SetGameGround(List<Vector2> points){
+        List<Vector2> sortedPoints = Funcs.SortPointsCounterClockwiseXZ(points);
+        for(int i = 0; i < 4; i++){
+            planeMat.SetVector("_P" + (i + 1), sortedPoints[i]);
+        }
+    }
+
     public void Tapped()
     {
         if (!isActive || spawnedGoose == null) return;
@@ -54,8 +68,8 @@ public class ChooseGameArea : MonoBehaviour
     void Update(){
         if (isActive) return;
         tMask += Time.deltaTime / timeMask;
-        if (tMask <=1)
-            planeMat.SetFloat("_MaskRadius", math.lerp(0.05f, 10, tMask));
+        if (tMask <=1) //planeMat.SetFloat("_SmoothDist", math.lerp(4.5f, 0.2f, tMask));
+            planeMat.SetFloat("_MaskRadius", math.lerp(0, 5, tMask));
     }
 
     void OnPlanesChanged(ARTrackablesChangedEventArgs<ARPlane> changes)
@@ -68,7 +82,8 @@ public class ChooseGameArea : MonoBehaviour
             //spawnPosition.y += 0.05f;
             spawnedGoose = Instantiate(goosePrefab, spawnPosition, Quaternion.identity);
             planeMat.SetVector("_GoosePos", spawnPosition);
-            planeMat.SetFloat("_MaskRadius", 0.05f);
+            //planeMat.SetFloat("_SmoothDist", 4.5f);
+            //planeMat.SetFloat("_MaskRadius", 0.05f);
             break;
         }
     }
@@ -81,17 +96,27 @@ public class ChooseGameArea : MonoBehaviour
         return currentPlane;
     }
 
-    public void SetupGame(){
-        isActive = false;
+    public void SetActive(){
+        isActive = true;
+    }
 
+    public void RemoveARPlanes(){
+        isActive = false;
         MeshFilter meshFilter = currentPlane.GetComponent<MeshFilter>();
-        Mesh planeMesh = meshFilter.mesh;
         foreach (ARPlane plane in arPlaneManager.trackables)
         {
             if (plane == currentPlane) continue;
             Destroy(plane.gameObject);
         }
-        spawnedGoose.GetComponent<PlayerController>().ActivateGoose(currentPlane.transform.position.y);
+        currentPlane.GetComponent<LineRenderer>().positionCount = 0;
+    }
+
+    public void SetupGame(){
+        
+        //planeMat.SetFloat("_GameStage", 1);
+        PlayerController playerController = spawnedGoose.GetComponent<PlayerController>();
+        playerController.ResetPlayer();
+        playerController.ActivateGoose(currentPlane.transform.position.y);
 
     }
 }

@@ -3,8 +3,8 @@ using UnityEngine;
 
 public class Room : MonoBehaviour
 {
-    [SerializeField] private GameObject[] walls;
-    public virtual void SetupRoom(List<MazeGenerator.RoomDoorInfo> roomDoorInfos, MazeGenerator mazeGenerator = null){
+    [SerializeField] protected GameObject[] walls;
+    public virtual void SetupRoom(List<MazeGenerator.RoomDoorInfo> roomDoorInfos, MazeGenerator _mazeGenerator = null, List<Vector2Int> roomCells = null){
         for(int i = 0; i < roomDoorInfos.Count; i++){
             Vector3 mid = (roomDoorInfos[i].worldInside + roomDoorInfos[i].worldOutside) / 2;
 
@@ -16,8 +16,7 @@ public class Room : MonoBehaviour
                     closestID = j;
                 }
             }
-            Debug.Log("i: " + i + " closest dist: " + closestDist + " mid: " + mid);
-            Destroy(walls[closestID]);
+            walls[closestID].SetActive(false);
         }
     }
 }

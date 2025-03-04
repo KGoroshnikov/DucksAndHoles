@@ -36,7 +36,7 @@ public class LvlPathGenerator : Room
     private Vector3 startPoint;
     private Vector3 endPoint;
 
-    public override void SetupRoom(List<MazeGenerator.RoomDoorInfo> roomDoorInfos, MazeGenerator _mazeGenerator)
+    public override void SetupRoom(List<MazeGenerator.RoomDoorInfo> roomDoorInfos, MazeGenerator _mazeGenerator, List<Vector2Int> roomCells = null)
     {
         mazeGenerator = _mazeGenerator;
         moveObjects = GameObject.Find("MoveObjects").GetComponent<MoveObjects>();
@@ -52,7 +52,7 @@ public class LvlPathGenerator : Room
         startPoint = (firstDist <= secondDist) ? pathPoints[0] : pathPoints[1];
         endPoint = (startPoint == pathPoints[0]) ? pathPoints[1] : pathPoints[0];
 
-        moveObjects.AddObjToMove(goose, 0.2f, startPoint, goose.rotation);
+        //moveObjects.AddObjToMove(goose, 0.2f, startPoint, goose.rotation);
 
         Vector3 mainDir = (endPoint - startPoint).normalized;
         Vector3 rightDir = Vector3.Cross(mainDir, Vector3.up);
@@ -81,6 +81,9 @@ public class LvlPathGenerator : Room
         lineRenderer.positionCount = holePoses.Count;
         lineRenderer.SetPositions(holePoses.ToArray());
 
+        int holeId = PlayerPrefs.GetInt("LvlsCompleted", 0) == 0 ? 0 : PlayerPrefs.GetInt("LvlsCompleted", 0) - 1;
+        moveObjects.AddObjToMove(goose, 0.2f, spawnedHoles[holeId].obj.transform.position, goose.rotation);
+
         LoadProgress();
         FinishHoles();
 
@@ -88,9 +91,14 @@ public class LvlPathGenerator : Room
     }
 
     void LoadProgress(){
-        spawnedHoles[0].unlocked = true;
-        spawnedHoles[0].passed = true;
-        spawnedHoles[1].unlocked = true;
+        int progress = PlayerPrefs.GetInt("LvlsCompleted", 0);
+
+        for(int i = 0; i < progress; i++){
+            spawnedHoles[i].unlocked = true;
+            spawnedHoles[i].passed = true;
+        }
+        if (progress >= spawnedHoles.Count) return;
+        spawnedHoles[progress].unlocked = true;
     }
 
     void Update()

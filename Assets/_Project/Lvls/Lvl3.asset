@@ -15,11 +15,8 @@ MonoBehaviour:
   minPathLength: 15
   maxMazeCellsX: 7
   maxMazeCellsY: 7
-  customRooms:
-  - roomPrefab: {fileID: 1357849753164606885, guid: 59b68e49b13e23d40b88ddad399b4f17,
-      type: 3}
-    pathFraction: 0.5
-    roomWidth: 2
-    roomHeight: 2
-    maxRoomPathTiles: 2
+  wrongHoles: 1
+  customRooms: []
   slimeAmount: 3
+  startCellType: 0
+  isLvlPath: 0

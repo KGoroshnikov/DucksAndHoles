@@ -1,4 +1,4 @@
-Shader "Shader Graphs/FogOfWar1"
+Shader "Shader Graphs/FogOfWar"
 {
     Properties
     {
@@ -11,7 +11,12 @@ Shader "Shader Graphs/FogOfWar1"
         _NoiseRange("NoiseRange", Vector) = (-0.5, 0.5, 0, 0)
         _RInnerSize("RInnerSize", Float) = 0.2
         _ROuterSize("ROuterSize", Float) = 0.4
+        _SmoothDist("SmoothDist", Float) = 0
         _ROutline("ROutline", Float) = 0.1
+        _P1("P1", Vector) = (0, 0, 0, 0)
+        _P2("P2", Vector) = (0, 0, 0, 0)
+        _P3("P3", Vector) = (0, 0, 0, 0)
+        _P4("P4", Vector) = (0, 0, 0, 0)
         [HideInInspector]_CastShadows("_CastShadows", Float) = 1
         [HideInInspector]_Surface("_Surface", Float) = 0
         [HideInInspector]_Blend("_Blend", Float) = 0
@@ -55,16 +60,12 @@ Shader "Shader Graphs/FogOfWar1"
                 // LightMode: <None>
             }
         
-        
-        
         // Render State
         Cull [_Cull]
         Blend [_SrcBlend] [_DstBlend]
         ZTest [_ZTest]
         ZWrite [_ZWrite]
         AlphaToMask [_AlphaToMask]
-        
-        
         
         // Debug
         // <None>
@@ -168,6 +169,7 @@ Shader "Shader Graphs/FogOfWar1"
         };
         struct SurfaceDescriptionInputs
         {
+             float3 AbsoluteWorldSpacePosition;
              float4 uv0;
              float3 TimeParameters;
         };
@@ -248,6 +250,11 @@ Shader "Shader Graphs/FogOfWar1"
         
         // Graph Properties
         CBUFFER_START(UnityPerMaterial)
+        float _SmoothDist;
+        float2 _P1;
+        float2 _P2;
+        float2 _P3;
+        float2 _P4;
         float2 _NoiseRange;
         float _Speed;
         float _NoiseScale;
@@ -269,6 +276,7 @@ Shader "Shader Graphs/FogOfWar1"
         
         // Graph Includes
         #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Hashes.hlsl"
+        #include_with_pragmas "Assets/_Project/Graphics/Shaders/QuadMask.hlsl"
         
         // -- Property used by ScenePickingPass
         #ifdef SCENEPICKINGPASS
@@ -320,66 +328,6 @@ Shader "Shader Graphs/FogOfWar1"
         void Unity_Lerp_float4(float4 A, float4 B, float4 T, out float4 Out)
         {
             Out = lerp(A, B, T);
-        }
-        
-        void Unity_Subtract_float4(float4 A, float4 B, out float4 Out)
-        {
-            Out = A - B;
-        }
-        
-        void Unity_Absolute_float(float In, out float Out)
-        {
-            Out = abs(In);
-        }
-        
-        void Unity_Maximum_float(float A, float B, out float Out)
-        {
-            Out = max(A, B);
-        }
-        
-        void Unity_Smoothstep_float(float Edge1, float Edge2, float In, out float Out)
-        {
-            Out = smoothstep(Edge1, Edge2, In);
-        }
-        
-        void Unity_Add_float(float A, float B, out float Out)
-        {
-            Out = A + B;
-        }
-        
-        struct Bindings_RectangleMask_e1162f732917c2244a46a1190ea7a822_float
-        {
-        half4 uv0;
-        };
-        
-        void SG_RectangleMask_e1162f732917c2244a46a1190ea7a822_float(float _RInnerSize, float _ROuterSize, float _ROutline, Bindings_RectangleMask_e1162f732917c2244a46a1190ea7a822_float IN, out float2 Out_Vector4_1)
-        {
-        float _Property_2252693489ad4269894cfa4003845323_Out_0_Float = _ROuterSize;
-        float _Property_597b07555a0d487ba45a9fe82db98ac9_Out_0_Float = _RInnerSize;
-        float4 _UV_ef7a53adb81947ddae47f6dfbe011d8b_Out_0_Vector4 = IN.uv0;
-        float4 _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4;
-        Unity_Subtract_float4(_UV_ef7a53adb81947ddae47f6dfbe011d8b_Out_0_Vector4, float4(0.5, 0.5, 1, 1), _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4);
-        float _Split_58523661dfe84e01b5fb53885bc84b2f_R_1_Float = _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4[0];
-        float _Split_58523661dfe84e01b5fb53885bc84b2f_G_2_Float = _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4[1];
-        float _Split_58523661dfe84e01b5fb53885bc84b2f_B_3_Float = _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4[2];
-        float _Split_58523661dfe84e01b5fb53885bc84b2f_A_4_Float = _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4[3];
-        float _Absolute_a03e193a02724419b142f9131aec117f_Out_1_Float;
-        Unity_Absolute_float(_Split_58523661dfe84e01b5fb53885bc84b2f_R_1_Float, _Absolute_a03e193a02724419b142f9131aec117f_Out_1_Float);
-        float _Absolute_f054ed5024bf49d896f6902792e3136f_Out_1_Float;
-        Unity_Absolute_float(_Split_58523661dfe84e01b5fb53885bc84b2f_G_2_Float, _Absolute_f054ed5024bf49d896f6902792e3136f_Out_1_Float);
-        float _Maximum_2ab7516ec96e459ca0c9a566ce94c15b_Out_2_Float;
-        Unity_Maximum_float(_Absolute_a03e193a02724419b142f9131aec117f_Out_1_Float, _Absolute_f054ed5024bf49d896f6902792e3136f_Out_1_Float, _Maximum_2ab7516ec96e459ca0c9a566ce94c15b_Out_2_Float);
-        float _Smoothstep_2153b3261b2344ec91f142dc996d740e_Out_3_Float;
-        Unity_Smoothstep_float(_Property_2252693489ad4269894cfa4003845323_Out_0_Float, _Property_597b07555a0d487ba45a9fe82db98ac9_Out_0_Float, _Maximum_2ab7516ec96e459ca0c9a566ce94c15b_Out_2_Float, _Smoothstep_2153b3261b2344ec91f142dc996d740e_Out_3_Float);
-        float _Property_d8845cccc6fb4d82bdbeffb0bff85ffe_Out_0_Float = _ROutline;
-        float _Add_4bd34cb7ed514624a6729a9c7f1f63bb_Out_2_Float;
-        Unity_Add_float(_Property_2252693489ad4269894cfa4003845323_Out_0_Float, _Property_d8845cccc6fb4d82bdbeffb0bff85ffe_Out_0_Float, _Add_4bd34cb7ed514624a6729a9c7f1f63bb_Out_2_Float);
-        float _Add_a0d54f1b8a844c4c835a883e8348f9c8_Out_2_Float;
-        Unity_Add_float(_Property_597b07555a0d487ba45a9fe82db98ac9_Out_0_Float, _Property_d8845cccc6fb4d82bdbeffb0bff85ffe_Out_0_Float, _Add_a0d54f1b8a844c4c835a883e8348f9c8_Out_2_Float);
-        float _Smoothstep_47f7c7791d064a39a30225fcd2fdf840_Out_3_Float;
-        Unity_Smoothstep_float(_Add_4bd34cb7ed514624a6729a9c7f1f63bb_Out_2_Float, _Add_a0d54f1b8a844c4c835a883e8348f9c8_Out_2_Float, _Maximum_2ab7516ec96e459ca0c9a566ce94c15b_Out_2_Float, _Smoothstep_47f7c7791d064a39a30225fcd2fdf840_Out_3_Float);
-        float2 _Vector2_dcca42d8c0cb47918ec61b61bcd3c192_Out_0_Vector2 = float2(_Smoothstep_2153b3261b2344ec91f142dc996d740e_Out_3_Float, _Smoothstep_47f7c7791d064a39a30225fcd2fdf840_Out_3_Float);
-        Out_Vector4_1 = _Vector2_dcca42d8c0cb47918ec61b61bcd3c192_Out_0_Vector2;
         }
         
         void Unity_OneMinus_float4(float4 In, out float4 Out)
@@ -454,17 +402,18 @@ Shader "Shader Graphs/FogOfWar1"
             float2 _Property_6f97261e55464055a267dad7cc95ecd5_Out_0_Vector2 = _NoiseRange;
             float _Remap_a354b957cb514be2a96ca58a1649b1ef_Out_3_Float;
             Unity_Remap_float(_GradientNoise_0c7e44cebf9e417c81d768141fa91208_Out_2_Float, float2 (-1, 1), _Property_6f97261e55464055a267dad7cc95ecd5_Out_0_Vector2, _Remap_a354b957cb514be2a96ca58a1649b1ef_Out_3_Float);
-            float _Property_72d5138da5b0428b941ab7b32e2a4fa4_Out_0_Float = _RInnerSize;
-            float _Property_18102176587545449b3a231c026e55b7_Out_0_Float = _ROuterSize;
-            float _Property_69477c54a6164b6b8dcd5cefd3ec68cb_Out_0_Float = _ROutline;
-            Bindings_RectangleMask_e1162f732917c2244a46a1190ea7a822_float _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf;
-            _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf.uv0 = IN.uv0;
-            float2 _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf_OutVector4_1_Vector2;
-            SG_RectangleMask_e1162f732917c2244a46a1190ea7a822_float(_Property_72d5138da5b0428b941ab7b32e2a4fa4_Out_0_Float, _Property_18102176587545449b3a231c026e55b7_Out_0_Float, _Property_69477c54a6164b6b8dcd5cefd3ec68cb_Out_0_Float, _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf, _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf_OutVector4_1_Vector2);
-            float _Split_913073d8da024c81a564e8cbac528cb3_R_1_Float = _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf_OutVector4_1_Vector2[0];
-            float _Split_913073d8da024c81a564e8cbac528cb3_G_2_Float = _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf_OutVector4_1_Vector2[1];
-            float _Split_913073d8da024c81a564e8cbac528cb3_B_3_Float = 0;
-            float _Split_913073d8da024c81a564e8cbac528cb3_A_4_Float = 0;
+            float _Split_538d90ebc5b74b4f96e51fd30b0aee49_R_1_Float = IN.AbsoluteWorldSpacePosition[0];
+            float _Split_538d90ebc5b74b4f96e51fd30b0aee49_G_2_Float = IN.AbsoluteWorldSpacePosition[1];
+            float _Split_538d90ebc5b74b4f96e51fd30b0aee49_B_3_Float = IN.AbsoluteWorldSpacePosition[2];
+            float _Split_538d90ebc5b74b4f96e51fd30b0aee49_A_4_Float = 0;
+            float2 _Vector2_418bf94619db4438a2a9c6e8a4055ab3_Out_0_Vector2 = float2(_Split_538d90ebc5b74b4f96e51fd30b0aee49_R_1_Float, _Split_538d90ebc5b74b4f96e51fd30b0aee49_B_3_Float);
+            float2 _Property_05d1f26d69014c848ad9355ba53f5987_Out_0_Vector2 = _P1;
+            float2 _Property_ebbca2b5b3e845b6926cc6f60d077774_Out_0_Vector2 = _P2;
+            float2 _Property_d1d20e45c3c04593808c78e1c3b5de4a_Out_0_Vector2 = _P3;
+            float2 _Property_9b57252c3d394199a5581ad0c7192d57_Out_0_Vector2 = _P4;
+            float _Property_b7eba52c8fed43acaa4cbafac035d43c_Out_0_Float = _SmoothDist;
+            float _GetInsideFactorCustomFunction_50302bf2fe0642c89db93523cb41c6e3_res_5_Float;
+            GetInsideFactor_float(_Vector2_418bf94619db4438a2a9c6e8a4055ab3_Out_0_Vector2, _Property_05d1f26d69014c848ad9355ba53f5987_Out_0_Vector2, _Property_ebbca2b5b3e845b6926cc6f60d077774_Out_0_Vector2, _Property_d1d20e45c3c04593808c78e1c3b5de4a_Out_0_Vector2, _Property_9b57252c3d394199a5581ad0c7192d57_Out_0_Vector2, _Property_b7eba52c8fed43acaa4cbafac035d43c_Out_0_Float, _GetInsideFactorCustomFunction_50302bf2fe0642c89db93523cb41c6e3_res_5_Float);
             UnityTexture2D _Property_c1c9af8e9aae47ab9d3205b9c791401b_Out_0_Texture2D = UnityBuildTexture2DStructNoScale(_RT_Particles);
               float4 _SampleTexture2DLOD_5c9f689ff1d74918b031cba63062a8ea_RGBA_0_Vector4 = SAMPLE_TEXTURE2D_LOD(_Property_c1c9af8e9aae47ab9d3205b9c791401b_Out_0_Texture2D.tex, _Property_c1c9af8e9aae47ab9d3205b9c791401b_Out_0_Texture2D.samplerstate, _Property_c1c9af8e9aae47ab9d3205b9c791401b_Out_0_Texture2D.GetTransformedUV(IN.uv0.xy), float(0));
             float _SampleTexture2DLOD_5c9f689ff1d74918b031cba63062a8ea_R_5_Float = _SampleTexture2DLOD_5c9f689ff1d74918b031cba63062a8ea_RGBA_0_Vector4.r;
@@ -474,7 +423,7 @@ Shader "Shader Graphs/FogOfWar1"
             float4 _OneMinus_33dafa6574d2459d8200dec61dbf7487_Out_1_Vector4;
             Unity_OneMinus_float4(_SampleTexture2DLOD_5c9f689ff1d74918b031cba63062a8ea_RGBA_0_Vector4, _OneMinus_33dafa6574d2459d8200dec61dbf7487_Out_1_Vector4);
             float4 _Multiply_590325aacfff435192271681bcdbfd09_Out_2_Vector4;
-            Unity_Multiply_float4_float4((_Split_913073d8da024c81a564e8cbac528cb3_R_1_Float.xxxx), _OneMinus_33dafa6574d2459d8200dec61dbf7487_Out_1_Vector4, _Multiply_590325aacfff435192271681bcdbfd09_Out_2_Vector4);
+            Unity_Multiply_float4_float4((_GetInsideFactorCustomFunction_50302bf2fe0642c89db93523cb41c6e3_res_5_Float.xxxx), _OneMinus_33dafa6574d2459d8200dec61dbf7487_Out_1_Vector4, _Multiply_590325aacfff435192271681bcdbfd09_Out_2_Vector4);
             float4 _Step_25aa498e99404ada84cfcd7440b8dbc2_Out_2_Vector4;
             Unity_Step_float4((_Remap_a354b957cb514be2a96ca58a1649b1ef_Out_3_Float.xxxx), _Multiply_590325aacfff435192271681bcdbfd09_Out_2_Vector4, _Step_25aa498e99404ada84cfcd7440b8dbc2_Out_2_Vector4);
             float _Split_2b19b259fdcd41098c7654eb0d05c9e0_R_1_Float = _Lerp_78072a5c55ee4ca0b7f8f3d76a772869_Out_3_Vector4[0];
@@ -531,6 +480,7 @@ Shader "Shader Graphs/FogOfWar1"
         
         
         
+            output.AbsoluteWorldSpacePosition = GetAbsolutePositionWS(input.positionWS);
         
             #if UNITY_UV_STARTS_AT_TOP
             #else
@@ -605,6 +555,7 @@ Shader "Shader Graphs/FogOfWar1"
         #define ATTRIBUTES_NEED_TEXCOORD0
         #define FEATURES_GRAPH_VERTEX_NORMAL_OUTPUT
         #define FEATURES_GRAPH_VERTEX_TANGENT_OUTPUT
+        #define VARYINGS_NEED_POSITION_WS
         #define VARYINGS_NEED_TEXCOORD0
         #define FEATURES_GRAPH_VERTEX
         /* WARNING: $splice Could not find named fragment 'PassInstancing' */
@@ -647,6 +598,7 @@ Shader "Shader Graphs/FogOfWar1"
         struct Varyings
         {
              float4 positionCS : SV_POSITION;
+             float3 positionWS;
              float4 texCoord0;
             #if UNITY_ANY_INSTANCING_ENABLED || defined(VARYINGS_NEED_INSTANCEID)
              uint instanceID : CUSTOM_INSTANCE_ID;
@@ -663,6 +615,7 @@ Shader "Shader Graphs/FogOfWar1"
         };
         struct SurfaceDescriptionInputs
         {
+             float3 AbsoluteWorldSpacePosition;
              float4 uv0;
              float3 TimeParameters;
         };
@@ -676,6 +629,7 @@ Shader "Shader Graphs/FogOfWar1"
         {
              float4 positionCS : SV_POSITION;
              float4 texCoord0 : INTERP0;
+             float3 positionWS : INTERP1;
             #if UNITY_ANY_INSTANCING_ENABLED || defined(VARYINGS_NEED_INSTANCEID)
              uint instanceID : CUSTOM_INSTANCE_ID;
             #endif
@@ -696,6 +650,7 @@ Shader "Shader Graphs/FogOfWar1"
             ZERO_INITIALIZE(PackedVaryings, output);
             output.positionCS = input.positionCS;
             output.texCoord0.xyzw = input.texCoord0;
+            output.positionWS.xyz = input.positionWS;
             #if UNITY_ANY_INSTANCING_ENABLED || defined(VARYINGS_NEED_INSTANCEID)
             output.instanceID = input.instanceID;
             #endif
@@ -716,6 +671,7 @@ Shader "Shader Graphs/FogOfWar1"
             Varyings output;
             output.positionCS = input.positionCS;
             output.texCoord0 = input.texCoord0.xyzw;
+            output.positionWS = input.positionWS.xyz;
             #if UNITY_ANY_INSTANCING_ENABLED || defined(VARYINGS_NEED_INSTANCEID)
             output.instanceID = input.instanceID;
             #endif
@@ -737,6 +693,11 @@ Shader "Shader Graphs/FogOfWar1"
         
         // Graph Properties
         CBUFFER_START(UnityPerMaterial)
+        float _SmoothDist;
+        float2 _P1;
+        float2 _P2;
+        float2 _P3;
+        float2 _P4;
         float2 _NoiseRange;
         float _Speed;
         float _NoiseScale;
@@ -758,6 +719,7 @@ Shader "Shader Graphs/FogOfWar1"
         
         // Graph Includes
         #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Hashes.hlsl"
+        #include_with_pragmas "Assets/_Project/Graphics/Shaders/QuadMask.hlsl"
         
         // -- Property used by ScenePickingPass
         #ifdef SCENEPICKINGPASS
@@ -804,66 +766,6 @@ Shader "Shader Graphs/FogOfWar1"
         void Unity_Remap_float(float In, float2 InMinMax, float2 OutMinMax, out float Out)
         {
             Out = OutMinMax.x + (In - InMinMax.x) * (OutMinMax.y - OutMinMax.x) / (InMinMax.y - InMinMax.x);
-        }
-        
-        void Unity_Subtract_float4(float4 A, float4 B, out float4 Out)
-        {
-            Out = A - B;
-        }
-        
-        void Unity_Absolute_float(float In, out float Out)
-        {
-            Out = abs(In);
-        }
-        
-        void Unity_Maximum_float(float A, float B, out float Out)
-        {
-            Out = max(A, B);
-        }
-        
-        void Unity_Smoothstep_float(float Edge1, float Edge2, float In, out float Out)
-        {
-            Out = smoothstep(Edge1, Edge2, In);
-        }
-        
-        void Unity_Add_float(float A, float B, out float Out)
-        {
-            Out = A + B;
-        }
-        
-        struct Bindings_RectangleMask_e1162f732917c2244a46a1190ea7a822_float
-        {
-        half4 uv0;
-        };
-        
-        void SG_RectangleMask_e1162f732917c2244a46a1190ea7a822_float(float _RInnerSize, float _ROuterSize, float _ROutline, Bindings_RectangleMask_e1162f732917c2244a46a1190ea7a822_float IN, out float2 Out_Vector4_1)
-        {
-        float _Property_2252693489ad4269894cfa4003845323_Out_0_Float = _ROuterSize;
-        float _Property_597b07555a0d487ba45a9fe82db98ac9_Out_0_Float = _RInnerSize;
-        float4 _UV_ef7a53adb81947ddae47f6dfbe011d8b_Out_0_Vector4 = IN.uv0;
-        float4 _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4;
-        Unity_Subtract_float4(_UV_ef7a53adb81947ddae47f6dfbe011d8b_Out_0_Vector4, float4(0.5, 0.5, 1, 1), _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4);
-        float _Split_58523661dfe84e01b5fb53885bc84b2f_R_1_Float = _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4[0];
-        float _Split_58523661dfe84e01b5fb53885bc84b2f_G_2_Float = _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4[1];
-        float _Split_58523661dfe84e01b5fb53885bc84b2f_B_3_Float = _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4[2];
-        float _Split_58523661dfe84e01b5fb53885bc84b2f_A_4_Float = _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4[3];
-        float _Absolute_a03e193a02724419b142f9131aec117f_Out_1_Float;
-        Unity_Absolute_float(_Split_58523661dfe84e01b5fb53885bc84b2f_R_1_Float, _Absolute_a03e193a02724419b142f9131aec117f_Out_1_Float);
-        float _Absolute_f054ed5024bf49d896f6902792e3136f_Out_1_Float;
-        Unity_Absolute_float(_Split_58523661dfe84e01b5fb53885bc84b2f_G_2_Float, _Absolute_f054ed5024bf49d896f6902792e3136f_Out_1_Float);
-        float _Maximum_2ab7516ec96e459ca0c9a566ce94c15b_Out_2_Float;
-        Unity_Maximum_float(_Absolute_a03e193a02724419b142f9131aec117f_Out_1_Float, _Absolute_f054ed5024bf49d896f6902792e3136f_Out_1_Float, _Maximum_2ab7516ec96e459ca0c9a566ce94c15b_Out_2_Float);
-        float _Smoothstep_2153b3261b2344ec91f142dc996d740e_Out_3_Float;
-        Unity_Smoothstep_float(_Property_2252693489ad4269894cfa4003845323_Out_0_Float, _Property_597b07555a0d487ba45a9fe82db98ac9_Out_0_Float, _Maximum_2ab7516ec96e459ca0c9a566ce94c15b_Out_2_Float, _Smoothstep_2153b3261b2344ec91f142dc996d740e_Out_3_Float);
-        float _Property_d8845cccc6fb4d82bdbeffb0bff85ffe_Out_0_Float = _ROutline;
-        float _Add_4bd34cb7ed514624a6729a9c7f1f63bb_Out_2_Float;
-        Unity_Add_float(_Property_2252693489ad4269894cfa4003845323_Out_0_Float, _Property_d8845cccc6fb4d82bdbeffb0bff85ffe_Out_0_Float, _Add_4bd34cb7ed514624a6729a9c7f1f63bb_Out_2_Float);
-        float _Add_a0d54f1b8a844c4c835a883e8348f9c8_Out_2_Float;
-        Unity_Add_float(_Property_597b07555a0d487ba45a9fe82db98ac9_Out_0_Float, _Property_d8845cccc6fb4d82bdbeffb0bff85ffe_Out_0_Float, _Add_a0d54f1b8a844c4c835a883e8348f9c8_Out_2_Float);
-        float _Smoothstep_47f7c7791d064a39a30225fcd2fdf840_Out_3_Float;
-        Unity_Smoothstep_float(_Add_4bd34cb7ed514624a6729a9c7f1f63bb_Out_2_Float, _Add_a0d54f1b8a844c4c835a883e8348f9c8_Out_2_Float, _Maximum_2ab7516ec96e459ca0c9a566ce94c15b_Out_2_Float, _Smoothstep_47f7c7791d064a39a30225fcd2fdf840_Out_3_Float);
-        float2 _Vector2_dcca42d8c0cb47918ec61b61bcd3c192_Out_0_Vector2 = float2(_Smoothstep_2153b3261b2344ec91f142dc996d740e_Out_3_Float, _Smoothstep_47f7c7791d064a39a30225fcd2fdf840_Out_3_Float);
-        Out_Vector4_1 = _Vector2_dcca42d8c0cb47918ec61b61bcd3c192_Out_0_Vector2;
         }
         
         void Unity_OneMinus_float4(float4 In, out float4 Out)
@@ -936,17 +838,18 @@ Shader "Shader Graphs/FogOfWar1"
             float2 _Property_6f97261e55464055a267dad7cc95ecd5_Out_0_Vector2 = _NoiseRange;
             float _Remap_a354b957cb514be2a96ca58a1649b1ef_Out_3_Float;
             Unity_Remap_float(_GradientNoise_0c7e44cebf9e417c81d768141fa91208_Out_2_Float, float2 (-1, 1), _Property_6f97261e55464055a267dad7cc95ecd5_Out_0_Vector2, _Remap_a354b957cb514be2a96ca58a1649b1ef_Out_3_Float);
-            float _Property_72d5138da5b0428b941ab7b32e2a4fa4_Out_0_Float = _RInnerSize;
-            float _Property_18102176587545449b3a231c026e55b7_Out_0_Float = _ROuterSize;
-            float _Property_69477c54a6164b6b8dcd5cefd3ec68cb_Out_0_Float = _ROutline;
-            Bindings_RectangleMask_e1162f732917c2244a46a1190ea7a822_float _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf;
-            _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf.uv0 = IN.uv0;
-            float2 _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf_OutVector4_1_Vector2;
-            SG_RectangleMask_e1162f732917c2244a46a1190ea7a822_float(_Property_72d5138da5b0428b941ab7b32e2a4fa4_Out_0_Float, _Property_18102176587545449b3a231c026e55b7_Out_0_Float, _Property_69477c54a6164b6b8dcd5cefd3ec68cb_Out_0_Float, _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf, _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf_OutVector4_1_Vector2);
-            float _Split_913073d8da024c81a564e8cbac528cb3_R_1_Float = _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf_OutVector4_1_Vector2[0];
-            float _Split_913073d8da024c81a564e8cbac528cb3_G_2_Float = _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf_OutVector4_1_Vector2[1];
-            float _Split_913073d8da024c81a564e8cbac528cb3_B_3_Float = 0;
-            float _Split_913073d8da024c81a564e8cbac528cb3_A_4_Float = 0;
+            float _Split_538d90ebc5b74b4f96e51fd30b0aee49_R_1_Float = IN.AbsoluteWorldSpacePosition[0];
+            float _Split_538d90ebc5b74b4f96e51fd30b0aee49_G_2_Float = IN.AbsoluteWorldSpacePosition[1];
+            float _Split_538d90ebc5b74b4f96e51fd30b0aee49_B_3_Float = IN.AbsoluteWorldSpacePosition[2];
+            float _Split_538d90ebc5b74b4f96e51fd30b0aee49_A_4_Float = 0;
+            float2 _Vector2_418bf94619db4438a2a9c6e8a4055ab3_Out_0_Vector2 = float2(_Split_538d90ebc5b74b4f96e51fd30b0aee49_R_1_Float, _Split_538d90ebc5b74b4f96e51fd30b0aee49_B_3_Float);
+            float2 _Property_05d1f26d69014c848ad9355ba53f5987_Out_0_Vector2 = _P1;
+            float2 _Property_ebbca2b5b3e845b6926cc6f60d077774_Out_0_Vector2 = _P2;
+            float2 _Property_d1d20e45c3c04593808c78e1c3b5de4a_Out_0_Vector2 = _P3;
+            float2 _Property_9b57252c3d394199a5581ad0c7192d57_Out_0_Vector2 = _P4;
+            float _Property_b7eba52c8fed43acaa4cbafac035d43c_Out_0_Float = _SmoothDist;
+            float _GetInsideFactorCustomFunction_50302bf2fe0642c89db93523cb41c6e3_res_5_Float;
+            GetInsideFactor_float(_Vector2_418bf94619db4438a2a9c6e8a4055ab3_Out_0_Vector2, _Property_05d1f26d69014c848ad9355ba53f5987_Out_0_Vector2, _Property_ebbca2b5b3e845b6926cc6f60d077774_Out_0_Vector2, _Property_d1d20e45c3c04593808c78e1c3b5de4a_Out_0_Vector2, _Property_9b57252c3d394199a5581ad0c7192d57_Out_0_Vector2, _Property_b7eba52c8fed43acaa4cbafac035d43c_Out_0_Float, _GetInsideFactorCustomFunction_50302bf2fe0642c89db93523cb41c6e3_res_5_Float);
             UnityTexture2D _Property_c1c9af8e9aae47ab9d3205b9c791401b_Out_0_Texture2D = UnityBuildTexture2DStructNoScale(_RT_Particles);
               float4 _SampleTexture2DLOD_5c9f689ff1d74918b031cba63062a8ea_RGBA_0_Vector4 = SAMPLE_TEXTURE2D_LOD(_Property_c1c9af8e9aae47ab9d3205b9c791401b_Out_0_Texture2D.tex, _Property_c1c9af8e9aae47ab9d3205b9c791401b_Out_0_Texture2D.samplerstate, _Property_c1c9af8e9aae47ab9d3205b9c791401b_Out_0_Texture2D.GetTransformedUV(IN.uv0.xy), float(0));
             float _SampleTexture2DLOD_5c9f689ff1d74918b031cba63062a8ea_R_5_Float = _SampleTexture2DLOD_5c9f689ff1d74918b031cba63062a8ea_RGBA_0_Vector4.r;
@@ -956,7 +859,7 @@ Shader "Shader Graphs/FogOfWar1"
             float4 _OneMinus_33dafa6574d2459d8200dec61dbf7487_Out_1_Vector4;
             Unity_OneMinus_float4(_SampleTexture2DLOD_5c9f689ff1d74918b031cba63062a8ea_RGBA_0_Vector4, _OneMinus_33dafa6574d2459d8200dec61dbf7487_Out_1_Vector4);
             float4 _Multiply_590325aacfff435192271681bcdbfd09_Out_2_Vector4;
-            Unity_Multiply_float4_float4((_Split_913073d8da024c81a564e8cbac528cb3_R_1_Float.xxxx), _OneMinus_33dafa6574d2459d8200dec61dbf7487_Out_1_Vector4, _Multiply_590325aacfff435192271681bcdbfd09_Out_2_Vector4);
+            Unity_Multiply_float4_float4((_GetInsideFactorCustomFunction_50302bf2fe0642c89db93523cb41c6e3_res_5_Float.xxxx), _OneMinus_33dafa6574d2459d8200dec61dbf7487_Out_1_Vector4, _Multiply_590325aacfff435192271681bcdbfd09_Out_2_Vector4);
             float4 _Step_25aa498e99404ada84cfcd7440b8dbc2_Out_2_Vector4;
             Unity_Step_float4((_Remap_a354b957cb514be2a96ca58a1649b1ef_Out_3_Float.xxxx), _Multiply_590325aacfff435192271681bcdbfd09_Out_2_Vector4, _Step_25aa498e99404ada84cfcd7440b8dbc2_Out_2_Vector4);
             float4 _Property_118cf34047e74c258a3206b84581d975_Out_0_Vector4 = _Color1;
@@ -1018,6 +921,7 @@ Shader "Shader Graphs/FogOfWar1"
         
         
         
+            output.AbsoluteWorldSpacePosition = GetAbsolutePositionWS(input.positionWS);
         
             #if UNITY_UV_STARTS_AT_TOP
             #else
@@ -1088,6 +992,7 @@ Shader "Shader Graphs/FogOfWar1"
         // Defines
         
         #define ATTRIBUTES_NEED_TEXCOORD0
+        #define VARYINGS_NEED_POSITION_WS
         #define VARYINGS_NEED_TEXCOORD0
         #define FEATURES_GRAPH_VERTEX
         /* WARNING: $splice Could not find named fragment 'PassInstancing' */
@@ -1129,6 +1034,7 @@ Shader "Shader Graphs/FogOfWar1"
         struct Varyings
         {
              float4 positionCS : SV_POSITION;
+             float3 positionWS;
              float4 texCoord0;
             #if UNITY_ANY_INSTANCING_ENABLED || defined(VARYINGS_NEED_INSTANCEID)
              uint instanceID : CUSTOM_INSTANCE_ID;
@@ -1145,6 +1051,7 @@ Shader "Shader Graphs/FogOfWar1"
         };
         struct SurfaceDescriptionInputs
         {
+             float3 AbsoluteWorldSpacePosition;
              float4 uv0;
              float3 TimeParameters;
         };
@@ -1156,6 +1063,7 @@ Shader "Shader Graphs/FogOfWar1"
         {
              float4 positionCS : SV_POSITION;
              float4 texCoord0 : INTERP0;
+             float3 positionWS : INTERP1;
             #if UNITY_ANY_INSTANCING_ENABLED || defined(VARYINGS_NEED_INSTANCEID)
              uint instanceID : CUSTOM_INSTANCE_ID;
             #endif
@@ -1176,6 +1084,7 @@ Shader "Shader Graphs/FogOfWar1"
             ZERO_INITIALIZE(PackedVaryings, output);
             output.positionCS = input.positionCS;
             output.texCoord0.xyzw = input.texCoord0;
+            output.positionWS.xyz = input.positionWS;
             #if UNITY_ANY_INSTANCING_ENABLED || defined(VARYINGS_NEED_INSTANCEID)
             output.instanceID = input.instanceID;
             #endif
@@ -1196,6 +1105,7 @@ Shader "Shader Graphs/FogOfWar1"
             Varyings output;
             output.positionCS = input.positionCS;
             output.texCoord0 = input.texCoord0.xyzw;
+            output.positionWS = input.positionWS.xyz;
             #if UNITY_ANY_INSTANCING_ENABLED || defined(VARYINGS_NEED_INSTANCEID)
             output.instanceID = input.instanceID;
             #endif
@@ -1217,6 +1127,11 @@ Shader "Shader Graphs/FogOfWar1"
         
         // Graph Properties
         CBUFFER_START(UnityPerMaterial)
+        float _SmoothDist;
+        float2 _P1;
+        float2 _P2;
+        float2 _P3;
+        float2 _P4;
         float2 _NoiseRange;
         float _Speed;
         float _NoiseScale;
@@ -1238,6 +1153,7 @@ Shader "Shader Graphs/FogOfWar1"
         
         // Graph Includes
         #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Hashes.hlsl"
+        #include_with_pragmas "Assets/_Project/Graphics/Shaders/QuadMask.hlsl"
         
         // -- Property used by ScenePickingPass
         #ifdef SCENEPICKINGPASS
@@ -1284,66 +1200,6 @@ Shader "Shader Graphs/FogOfWar1"
         void Unity_Remap_float(float In, float2 InMinMax, float2 OutMinMax, out float Out)
         {
             Out = OutMinMax.x + (In - InMinMax.x) * (OutMinMax.y - OutMinMax.x) / (InMinMax.y - InMinMax.x);
-        }
-        
-        void Unity_Subtract_float4(float4 A, float4 B, out float4 Out)
-        {
-            Out = A - B;
-        }
-        
-        void Unity_Absolute_float(float In, out float Out)
-        {
-            Out = abs(In);
-        }
-        
-        void Unity_Maximum_float(float A, float B, out float Out)
-        {
-            Out = max(A, B);
-        }
-        
-        void Unity_Smoothstep_float(float Edge1, float Edge2, float In, out float Out)
-        {
-            Out = smoothstep(Edge1, Edge2, In);
-        }
-        
-        void Unity_Add_float(float A, float B, out float Out)
-        {
-            Out = A + B;
-        }
-        
-        struct Bindings_RectangleMask_e1162f732917c2244a46a1190ea7a822_float
-        {
-        half4 uv0;
-        };
-        
-        void SG_RectangleMask_e1162f732917c2244a46a1190ea7a822_float(float _RInnerSize, float _ROuterSize, float _ROutline, Bindings_RectangleMask_e1162f732917c2244a46a1190ea7a822_float IN, out float2 Out_Vector4_1)
-        {
-        float _Property_2252693489ad4269894cfa4003845323_Out_0_Float = _ROuterSize;
-        float _Property_597b07555a0d487ba45a9fe82db98ac9_Out_0_Float = _RInnerSize;
-        float4 _UV_ef7a53adb81947ddae47f6dfbe011d8b_Out_0_Vector4 = IN.uv0;
-        float4 _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4;
-        Unity_Subtract_float4(_UV_ef7a53adb81947ddae47f6dfbe011d8b_Out_0_Vector4, float4(0.5, 0.5, 1, 1), _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4);
-        float _Split_58523661dfe84e01b5fb53885bc84b2f_R_1_Float = _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4[0];
-        float _Split_58523661dfe84e01b5fb53885bc84b2f_G_2_Float = _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4[1];
-        float _Split_58523661dfe84e01b5fb53885bc84b2f_B_3_Float = _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4[2];
-        float _Split_58523661dfe84e01b5fb53885bc84b2f_A_4_Float = _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4[3];
-        float _Absolute_a03e193a02724419b142f9131aec117f_Out_1_Float;
-        Unity_Absolute_float(_Split_58523661dfe84e01b5fb53885bc84b2f_R_1_Float, _Absolute_a03e193a02724419b142f9131aec117f_Out_1_Float);
-        float _Absolute_f054ed5024bf49d896f6902792e3136f_Out_1_Float;
-        Unity_Absolute_float(_Split_58523661dfe84e01b5fb53885bc84b2f_G_2_Float, _Absolute_f054ed5024bf49d896f6902792e3136f_Out_1_Float);
-        float _Maximum_2ab7516ec96e459ca0c9a566ce94c15b_Out_2_Float;
-        Unity_Maximum_float(_Absolute_a03e193a02724419b142f9131aec117f_Out_1_Float, _Absolute_f054ed5024bf49d896f6902792e3136f_Out_1_Float, _Maximum_2ab7516ec96e459ca0c9a566ce94c15b_Out_2_Float);
-        float _Smoothstep_2153b3261b2344ec91f142dc996d740e_Out_3_Float;
-        Unity_Smoothstep_float(_Property_2252693489ad4269894cfa4003845323_Out_0_Float, _Property_597b07555a0d487ba45a9fe82db98ac9_Out_0_Float, _Maximum_2ab7516ec96e459ca0c9a566ce94c15b_Out_2_Float, _Smoothstep_2153b3261b2344ec91f142dc996d740e_Out_3_Float);
-        float _Property_d8845cccc6fb4d82bdbeffb0bff85ffe_Out_0_Float = _ROutline;
-        float _Add_4bd34cb7ed514624a6729a9c7f1f63bb_Out_2_Float;
-        Unity_Add_float(_Property_2252693489ad4269894cfa4003845323_Out_0_Float, _Property_d8845cccc6fb4d82bdbeffb0bff85ffe_Out_0_Float, _Add_4bd34cb7ed514624a6729a9c7f1f63bb_Out_2_Float);
-        float _Add_a0d54f1b8a844c4c835a883e8348f9c8_Out_2_Float;
-        Unity_Add_float(_Property_597b07555a0d487ba45a9fe82db98ac9_Out_0_Float, _Property_d8845cccc6fb4d82bdbeffb0bff85ffe_Out_0_Float, _Add_a0d54f1b8a844c4c835a883e8348f9c8_Out_2_Float);
-        float _Smoothstep_47f7c7791d064a39a30225fcd2fdf840_Out_3_Float;
-        Unity_Smoothstep_float(_Add_4bd34cb7ed514624a6729a9c7f1f63bb_Out_2_Float, _Add_a0d54f1b8a844c4c835a883e8348f9c8_Out_2_Float, _Maximum_2ab7516ec96e459ca0c9a566ce94c15b_Out_2_Float, _Smoothstep_47f7c7791d064a39a30225fcd2fdf840_Out_3_Float);
-        float2 _Vector2_dcca42d8c0cb47918ec61b61bcd3c192_Out_0_Vector2 = float2(_Smoothstep_2153b3261b2344ec91f142dc996d740e_Out_3_Float, _Smoothstep_47f7c7791d064a39a30225fcd2fdf840_Out_3_Float);
-        Out_Vector4_1 = _Vector2_dcca42d8c0cb47918ec61b61bcd3c192_Out_0_Vector2;
         }
         
         void Unity_OneMinus_float4(float4 In, out float4 Out)
@@ -1412,17 +1268,18 @@ Shader "Shader Graphs/FogOfWar1"
             float2 _Property_6f97261e55464055a267dad7cc95ecd5_Out_0_Vector2 = _NoiseRange;
             float _Remap_a354b957cb514be2a96ca58a1649b1ef_Out_3_Float;
             Unity_Remap_float(_GradientNoise_0c7e44cebf9e417c81d768141fa91208_Out_2_Float, float2 (-1, 1), _Property_6f97261e55464055a267dad7cc95ecd5_Out_0_Vector2, _Remap_a354b957cb514be2a96ca58a1649b1ef_Out_3_Float);
-            float _Property_72d5138da5b0428b941ab7b32e2a4fa4_Out_0_Float = _RInnerSize;
-            float _Property_18102176587545449b3a231c026e55b7_Out_0_Float = _ROuterSize;
-            float _Property_69477c54a6164b6b8dcd5cefd3ec68cb_Out_0_Float = _ROutline;
-            Bindings_RectangleMask_e1162f732917c2244a46a1190ea7a822_float _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf;
-            _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf.uv0 = IN.uv0;
-            float2 _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf_OutVector4_1_Vector2;
-            SG_RectangleMask_e1162f732917c2244a46a1190ea7a822_float(_Property_72d5138da5b0428b941ab7b32e2a4fa4_Out_0_Float, _Property_18102176587545449b3a231c026e55b7_Out_0_Float, _Property_69477c54a6164b6b8dcd5cefd3ec68cb_Out_0_Float, _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf, _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf_OutVector4_1_Vector2);
-            float _Split_913073d8da024c81a564e8cbac528cb3_R_1_Float = _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf_OutVector4_1_Vector2[0];
-            float _Split_913073d8da024c81a564e8cbac528cb3_G_2_Float = _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf_OutVector4_1_Vector2[1];
-            float _Split_913073d8da024c81a564e8cbac528cb3_B_3_Float = 0;
-            float _Split_913073d8da024c81a564e8cbac528cb3_A_4_Float = 0;
+            float _Split_538d90ebc5b74b4f96e51fd30b0aee49_R_1_Float = IN.AbsoluteWorldSpacePosition[0];
+            float _Split_538d90ebc5b74b4f96e51fd30b0aee49_G_2_Float = IN.AbsoluteWorldSpacePosition[1];
+            float _Split_538d90ebc5b74b4f96e51fd30b0aee49_B_3_Float = IN.AbsoluteWorldSpacePosition[2];
+            float _Split_538d90ebc5b74b4f96e51fd30b0aee49_A_4_Float = 0;
+            float2 _Vector2_418bf94619db4438a2a9c6e8a4055ab3_Out_0_Vector2 = float2(_Split_538d90ebc5b74b4f96e51fd30b0aee49_R_1_Float, _Split_538d90ebc5b74b4f96e51fd30b0aee49_B_3_Float);
+            float2 _Property_05d1f26d69014c848ad9355ba53f5987_Out_0_Vector2 = _P1;
+            float2 _Property_ebbca2b5b3e845b6926cc6f60d077774_Out_0_Vector2 = _P2;
+            float2 _Property_d1d20e45c3c04593808c78e1c3b5de4a_Out_0_Vector2 = _P3;
+            float2 _Property_9b57252c3d394199a5581ad0c7192d57_Out_0_Vector2 = _P4;
+            float _Property_b7eba52c8fed43acaa4cbafac035d43c_Out_0_Float = _SmoothDist;
+            float _GetInsideFactorCustomFunction_50302bf2fe0642c89db93523cb41c6e3_res_5_Float;
+            GetInsideFactor_float(_Vector2_418bf94619db4438a2a9c6e8a4055ab3_Out_0_Vector2, _Property_05d1f26d69014c848ad9355ba53f5987_Out_0_Vector2, _Property_ebbca2b5b3e845b6926cc6f60d077774_Out_0_Vector2, _Property_d1d20e45c3c04593808c78e1c3b5de4a_Out_0_Vector2, _Property_9b57252c3d394199a5581ad0c7192d57_Out_0_Vector2, _Property_b7eba52c8fed43acaa4cbafac035d43c_Out_0_Float, _GetInsideFactorCustomFunction_50302bf2fe0642c89db93523cb41c6e3_res_5_Float);
             UnityTexture2D _Property_c1c9af8e9aae47ab9d3205b9c791401b_Out_0_Texture2D = UnityBuildTexture2DStructNoScale(_RT_Particles);
               float4 _SampleTexture2DLOD_5c9f689ff1d74918b031cba63062a8ea_RGBA_0_Vector4 = SAMPLE_TEXTURE2D_LOD(_Property_c1c9af8e9aae47ab9d3205b9c791401b_Out_0_Texture2D.tex, _Property_c1c9af8e9aae47ab9d3205b9c791401b_Out_0_Texture2D.samplerstate, _Property_c1c9af8e9aae47ab9d3205b9c791401b_Out_0_Texture2D.GetTransformedUV(IN.uv0.xy), float(0));
             float _SampleTexture2DLOD_5c9f689ff1d74918b031cba63062a8ea_R_5_Float = _SampleTexture2DLOD_5c9f689ff1d74918b031cba63062a8ea_RGBA_0_Vector4.r;
@@ -1432,7 +1289,7 @@ Shader "Shader Graphs/FogOfWar1"
             float4 _OneMinus_33dafa6574d2459d8200dec61dbf7487_Out_1_Vector4;
             Unity_OneMinus_float4(_SampleTexture2DLOD_5c9f689ff1d74918b031cba63062a8ea_RGBA_0_Vector4, _OneMinus_33dafa6574d2459d8200dec61dbf7487_Out_1_Vector4);
             float4 _Multiply_590325aacfff435192271681bcdbfd09_Out_2_Vector4;
-            Unity_Multiply_float4_float4((_Split_913073d8da024c81a564e8cbac528cb3_R_1_Float.xxxx), _OneMinus_33dafa6574d2459d8200dec61dbf7487_Out_1_Vector4, _Multiply_590325aacfff435192271681bcdbfd09_Out_2_Vector4);
+            Unity_Multiply_float4_float4((_GetInsideFactorCustomFunction_50302bf2fe0642c89db93523cb41c6e3_res_5_Float.xxxx), _OneMinus_33dafa6574d2459d8200dec61dbf7487_Out_1_Vector4, _Multiply_590325aacfff435192271681bcdbfd09_Out_2_Vector4);
             float4 _Step_25aa498e99404ada84cfcd7440b8dbc2_Out_2_Vector4;
             Unity_Step_float4((_Remap_a354b957cb514be2a96ca58a1649b1ef_Out_3_Float.xxxx), _Multiply_590325aacfff435192271681bcdbfd09_Out_2_Vector4, _Step_25aa498e99404ada84cfcd7440b8dbc2_Out_2_Vector4);
             float4 _Property_118cf34047e74c258a3206b84581d975_Out_0_Vector4 = _Color1;
@@ -1492,6 +1349,7 @@ Shader "Shader Graphs/FogOfWar1"
         
         
         
+            output.AbsoluteWorldSpacePosition = GetAbsolutePositionWS(input.positionWS);
         
             #if UNITY_UV_STARTS_AT_TOP
             #else
@@ -1569,6 +1427,7 @@ Shader "Shader Graphs/FogOfWar1"
         #define ATTRIBUTES_NEED_TEXCOORD0
         #define FEATURES_GRAPH_VERTEX_NORMAL_OUTPUT
         #define FEATURES_GRAPH_VERTEX_TANGENT_OUTPUT
+        #define VARYINGS_NEED_POSITION_WS
         #define VARYINGS_NEED_NORMAL_WS
         #define VARYINGS_NEED_TEXCOORD0
         #define FEATURES_GRAPH_VERTEX
@@ -1613,6 +1472,7 @@ Shader "Shader Graphs/FogOfWar1"
         struct Varyings
         {
              float4 positionCS : SV_POSITION;
+             float3 positionWS;
              float3 normalWS;
              float4 texCoord0;
             #if UNITY_ANY_INSTANCING_ENABLED || defined(VARYINGS_NEED_INSTANCEID)
@@ -1630,6 +1490,7 @@ Shader "Shader Graphs/FogOfWar1"
         };
         struct SurfaceDescriptionInputs
         {
+             float3 AbsoluteWorldSpacePosition;
              float4 uv0;
              float3 TimeParameters;
         };
@@ -1643,7 +1504,8 @@ Shader "Shader Graphs/FogOfWar1"
         {
              float4 positionCS : SV_POSITION;
              float4 texCoord0 : INTERP0;
-             float3 normalWS : INTERP1;
+             float3 positionWS : INTERP1;
+             float3 normalWS : INTERP2;
             #if UNITY_ANY_INSTANCING_ENABLED || defined(VARYINGS_NEED_INSTANCEID)
              uint instanceID : CUSTOM_INSTANCE_ID;
             #endif
@@ -1664,6 +1526,7 @@ Shader "Shader Graphs/FogOfWar1"
             ZERO_INITIALIZE(PackedVaryings, output);
             output.positionCS = input.positionCS;
             output.texCoord0.xyzw = input.texCoord0;
+            output.positionWS.xyz = input.positionWS;
             output.normalWS.xyz = input.normalWS;
             #if UNITY_ANY_INSTANCING_ENABLED || defined(VARYINGS_NEED_INSTANCEID)
             output.instanceID = input.instanceID;
@@ -1685,6 +1548,7 @@ Shader "Shader Graphs/FogOfWar1"
             Varyings output;
             output.positionCS = input.positionCS;
             output.texCoord0 = input.texCoord0.xyzw;
+            output.positionWS = input.positionWS.xyz;
             output.normalWS = input.normalWS.xyz;
             #if UNITY_ANY_INSTANCING_ENABLED || defined(VARYINGS_NEED_INSTANCEID)
             output.instanceID = input.instanceID;
@@ -1707,6 +1571,11 @@ Shader "Shader Graphs/FogOfWar1"
         
         // Graph Properties
         CBUFFER_START(UnityPerMaterial)
+        float _SmoothDist;
+        float2 _P1;
+        float2 _P2;
+        float2 _P3;
+        float2 _P4;
         float2 _NoiseRange;
         float _Speed;
         float _NoiseScale;
@@ -1728,6 +1597,7 @@ Shader "Shader Graphs/FogOfWar1"
         
         // Graph Includes
         #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Hashes.hlsl"
+        #include_with_pragmas "Assets/_Project/Graphics/Shaders/QuadMask.hlsl"
         
         // -- Property used by ScenePickingPass
         #ifdef SCENEPICKINGPASS
@@ -1774,66 +1644,6 @@ Shader "Shader Graphs/FogOfWar1"
         void Unity_Remap_float(float In, float2 InMinMax, float2 OutMinMax, out float Out)
         {
             Out = OutMinMax.x + (In - InMinMax.x) * (OutMinMax.y - OutMinMax.x) / (InMinMax.y - InMinMax.x);
-        }
-        
-        void Unity_Subtract_float4(float4 A, float4 B, out float4 Out)
-        {
-            Out = A - B;
-        }
-        
-        void Unity_Absolute_float(float In, out float Out)
-        {
-            Out = abs(In);
-        }
-        
-        void Unity_Maximum_float(float A, float B, out float Out)
-        {
-            Out = max(A, B);
-        }
-        
-        void Unity_Smoothstep_float(float Edge1, float Edge2, float In, out float Out)
-        {
-            Out = smoothstep(Edge1, Edge2, In);
-        }
-        
-        void Unity_Add_float(float A, float B, out float Out)
-        {
-            Out = A + B;
-        }
-        
-        struct Bindings_RectangleMask_e1162f732917c2244a46a1190ea7a822_float
-        {
-        half4 uv0;
-        };
-        
-        void SG_RectangleMask_e1162f732917c2244a46a1190ea7a822_float(float _RInnerSize, float _ROuterSize, float _ROutline, Bindings_RectangleMask_e1162f732917c2244a46a1190ea7a822_float IN, out float2 Out_Vector4_1)
-        {
-        float _Property_2252693489ad4269894cfa4003845323_Out_0_Float = _ROuterSize;
-        float _Property_597b07555a0d487ba45a9fe82db98ac9_Out_0_Float = _RInnerSize;
-        float4 _UV_ef7a53adb81947ddae47f6dfbe011d8b_Out_0_Vector4 = IN.uv0;
-        float4 _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4;
-        Unity_Subtract_float4(_UV_ef7a53adb81947ddae47f6dfbe011d8b_Out_0_Vector4, float4(0.5, 0.5, 1, 1), _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4);
-        float _Split_58523661dfe84e01b5fb53885bc84b2f_R_1_Float = _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4[0];
-        float _Split_58523661dfe84e01b5fb53885bc84b2f_G_2_Float = _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4[1];
-        float _Split_58523661dfe84e01b5fb53885bc84b2f_B_3_Float = _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4[2];
-        float _Split_58523661dfe84e01b5fb53885bc84b2f_A_4_Float = _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4[3];
-        float _Absolute_a03e193a02724419b142f9131aec117f_Out_1_Float;
-        Unity_Absolute_float(_Split_58523661dfe84e01b5fb53885bc84b2f_R_1_Float, _Absolute_a03e193a02724419b142f9131aec117f_Out_1_Float);
-        float _Absolute_f054ed5024bf49d896f6902792e3136f_Out_1_Float;
-        Unity_Absolute_float(_Split_58523661dfe84e01b5fb53885bc84b2f_G_2_Float, _Absolute_f054ed5024bf49d896f6902792e3136f_Out_1_Float);
-        float _Maximum_2ab7516ec96e459ca0c9a566ce94c15b_Out_2_Float;
-        Unity_Maximum_float(_Absolute_a03e193a02724419b142f9131aec117f_Out_1_Float, _Absolute_f054ed5024bf49d896f6902792e3136f_Out_1_Float, _Maximum_2ab7516ec96e459ca0c9a566ce94c15b_Out_2_Float);
-        float _Smoothstep_2153b3261b2344ec91f142dc996d740e_Out_3_Float;
-        Unity_Smoothstep_float(_Property_2252693489ad4269894cfa4003845323_Out_0_Float, _Property_597b07555a0d487ba45a9fe82db98ac9_Out_0_Float, _Maximum_2ab7516ec96e459ca0c9a566ce94c15b_Out_2_Float, _Smoothstep_2153b3261b2344ec91f142dc996d740e_Out_3_Float);
-        float _Property_d8845cccc6fb4d82bdbeffb0bff85ffe_Out_0_Float = _ROutline;
-        float _Add_4bd34cb7ed514624a6729a9c7f1f63bb_Out_2_Float;
-        Unity_Add_float(_Property_2252693489ad4269894cfa4003845323_Out_0_Float, _Property_d8845cccc6fb4d82bdbeffb0bff85ffe_Out_0_Float, _Add_4bd34cb7ed514624a6729a9c7f1f63bb_Out_2_Float);
-        float _Add_a0d54f1b8a844c4c835a883e8348f9c8_Out_2_Float;
-        Unity_Add_float(_Property_597b07555a0d487ba45a9fe82db98ac9_Out_0_Float, _Property_d8845cccc6fb4d82bdbeffb0bff85ffe_Out_0_Float, _Add_a0d54f1b8a844c4c835a883e8348f9c8_Out_2_Float);
-        float _Smoothstep_47f7c7791d064a39a30225fcd2fdf840_Out_3_Float;
-        Unity_Smoothstep_float(_Add_4bd34cb7ed514624a6729a9c7f1f63bb_Out_2_Float, _Add_a0d54f1b8a844c4c835a883e8348f9c8_Out_2_Float, _Maximum_2ab7516ec96e459ca0c9a566ce94c15b_Out_2_Float, _Smoothstep_47f7c7791d064a39a30225fcd2fdf840_Out_3_Float);
-        float2 _Vector2_dcca42d8c0cb47918ec61b61bcd3c192_Out_0_Vector2 = float2(_Smoothstep_2153b3261b2344ec91f142dc996d740e_Out_3_Float, _Smoothstep_47f7c7791d064a39a30225fcd2fdf840_Out_3_Float);
-        Out_Vector4_1 = _Vector2_dcca42d8c0cb47918ec61b61bcd3c192_Out_0_Vector2;
         }
         
         void Unity_OneMinus_float4(float4 In, out float4 Out)
@@ -1906,17 +1716,18 @@ Shader "Shader Graphs/FogOfWar1"
             float2 _Property_6f97261e55464055a267dad7cc95ecd5_Out_0_Vector2 = _NoiseRange;
             float _Remap_a354b957cb514be2a96ca58a1649b1ef_Out_3_Float;
             Unity_Remap_float(_GradientNoise_0c7e44cebf9e417c81d768141fa91208_Out_2_Float, float2 (-1, 1), _Property_6f97261e55464055a267dad7cc95ecd5_Out_0_Vector2, _Remap_a354b957cb514be2a96ca58a1649b1ef_Out_3_Float);
-            float _Property_72d5138da5b0428b941ab7b32e2a4fa4_Out_0_Float = _RInnerSize;
-            float _Property_18102176587545449b3a231c026e55b7_Out_0_Float = _ROuterSize;
-            float _Property_69477c54a6164b6b8dcd5cefd3ec68cb_Out_0_Float = _ROutline;
-            Bindings_RectangleMask_e1162f732917c2244a46a1190ea7a822_float _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf;
-            _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf.uv0 = IN.uv0;
-            float2 _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf_OutVector4_1_Vector2;
-            SG_RectangleMask_e1162f732917c2244a46a1190ea7a822_float(_Property_72d5138da5b0428b941ab7b32e2a4fa4_Out_0_Float, _Property_18102176587545449b3a231c026e55b7_Out_0_Float, _Property_69477c54a6164b6b8dcd5cefd3ec68cb_Out_0_Float, _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf, _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf_OutVector4_1_Vector2);
-            float _Split_913073d8da024c81a564e8cbac528cb3_R_1_Float = _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf_OutVector4_1_Vector2[0];
-            float _Split_913073d8da024c81a564e8cbac528cb3_G_2_Float = _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf_OutVector4_1_Vector2[1];
-            float _Split_913073d8da024c81a564e8cbac528cb3_B_3_Float = 0;
-            float _Split_913073d8da024c81a564e8cbac528cb3_A_4_Float = 0;
+            float _Split_538d90ebc5b74b4f96e51fd30b0aee49_R_1_Float = IN.AbsoluteWorldSpacePosition[0];
+            float _Split_538d90ebc5b74b4f96e51fd30b0aee49_G_2_Float = IN.AbsoluteWorldSpacePosition[1];
+            float _Split_538d90ebc5b74b4f96e51fd30b0aee49_B_3_Float = IN.AbsoluteWorldSpacePosition[2];
+            float _Split_538d90ebc5b74b4f96e51fd30b0aee49_A_4_Float = 0;
+            float2 _Vector2_418bf94619db4438a2a9c6e8a4055ab3_Out_0_Vector2 = float2(_Split_538d90ebc5b74b4f96e51fd30b0aee49_R_1_Float, _Split_538d90ebc5b74b4f96e51fd30b0aee49_B_3_Float);
+            float2 _Property_05d1f26d69014c848ad9355ba53f5987_Out_0_Vector2 = _P1;
+            float2 _Property_ebbca2b5b3e845b6926cc6f60d077774_Out_0_Vector2 = _P2;
+            float2 _Property_d1d20e45c3c04593808c78e1c3b5de4a_Out_0_Vector2 = _P3;
+            float2 _Property_9b57252c3d394199a5581ad0c7192d57_Out_0_Vector2 = _P4;
+            float _Property_b7eba52c8fed43acaa4cbafac035d43c_Out_0_Float = _SmoothDist;
+            float _GetInsideFactorCustomFunction_50302bf2fe0642c89db93523cb41c6e3_res_5_Float;
+            GetInsideFactor_float(_Vector2_418bf94619db4438a2a9c6e8a4055ab3_Out_0_Vector2, _Property_05d1f26d69014c848ad9355ba53f5987_Out_0_Vector2, _Property_ebbca2b5b3e845b6926cc6f60d077774_Out_0_Vector2, _Property_d1d20e45c3c04593808c78e1c3b5de4a_Out_0_Vector2, _Property_9b57252c3d394199a5581ad0c7192d57_Out_0_Vector2, _Property_b7eba52c8fed43acaa4cbafac035d43c_Out_0_Float, _GetInsideFactorCustomFunction_50302bf2fe0642c89db93523cb41c6e3_res_5_Float);
             UnityTexture2D _Property_c1c9af8e9aae47ab9d3205b9c791401b_Out_0_Texture2D = UnityBuildTexture2DStructNoScale(_RT_Particles);
               float4 _SampleTexture2DLOD_5c9f689ff1d74918b031cba63062a8ea_RGBA_0_Vector4 = SAMPLE_TEXTURE2D_LOD(_Property_c1c9af8e9aae47ab9d3205b9c791401b_Out_0_Texture2D.tex, _Property_c1c9af8e9aae47ab9d3205b9c791401b_Out_0_Texture2D.samplerstate, _Property_c1c9af8e9aae47ab9d3205b9c791401b_Out_0_Texture2D.GetTransformedUV(IN.uv0.xy), float(0));
             float _SampleTexture2DLOD_5c9f689ff1d74918b031cba63062a8ea_R_5_Float = _SampleTexture2DLOD_5c9f689ff1d74918b031cba63062a8ea_RGBA_0_Vector4.r;
@@ -1926,7 +1737,7 @@ Shader "Shader Graphs/FogOfWar1"
             float4 _OneMinus_33dafa6574d2459d8200dec61dbf7487_Out_1_Vector4;
             Unity_OneMinus_float4(_SampleTexture2DLOD_5c9f689ff1d74918b031cba63062a8ea_RGBA_0_Vector4, _OneMinus_33dafa6574d2459d8200dec61dbf7487_Out_1_Vector4);
             float4 _Multiply_590325aacfff435192271681bcdbfd09_Out_2_Vector4;
-            Unity_Multiply_float4_float4((_Split_913073d8da024c81a564e8cbac528cb3_R_1_Float.xxxx), _OneMinus_33dafa6574d2459d8200dec61dbf7487_Out_1_Vector4, _Multiply_590325aacfff435192271681bcdbfd09_Out_2_Vector4);
+            Unity_Multiply_float4_float4((_GetInsideFactorCustomFunction_50302bf2fe0642c89db93523cb41c6e3_res_5_Float.xxxx), _OneMinus_33dafa6574d2459d8200dec61dbf7487_Out_1_Vector4, _Multiply_590325aacfff435192271681bcdbfd09_Out_2_Vector4);
             float4 _Step_25aa498e99404ada84cfcd7440b8dbc2_Out_2_Vector4;
             Unity_Step_float4((_Remap_a354b957cb514be2a96ca58a1649b1ef_Out_3_Float.xxxx), _Multiply_590325aacfff435192271681bcdbfd09_Out_2_Vector4, _Step_25aa498e99404ada84cfcd7440b8dbc2_Out_2_Vector4);
             float4 _Property_118cf34047e74c258a3206b84581d975_Out_0_Vector4 = _Color1;
@@ -1988,6 +1799,7 @@ Shader "Shader Graphs/FogOfWar1"
         
         
         
+            output.AbsoluteWorldSpacePosition = GetAbsolutePositionWS(input.positionWS);
         
             #if UNITY_UV_STARTS_AT_TOP
             #else
@@ -2063,6 +1875,7 @@ Shader "Shader Graphs/FogOfWar1"
         #define ATTRIBUTES_NEED_TEXCOORD0
         #define FEATURES_GRAPH_VERTEX_NORMAL_OUTPUT
         #define FEATURES_GRAPH_VERTEX_TANGENT_OUTPUT
+        #define VARYINGS_NEED_POSITION_WS
         #define VARYINGS_NEED_NORMAL_WS
         #define VARYINGS_NEED_TEXCOORD0
         #define FEATURES_GRAPH_VERTEX
@@ -2106,6 +1919,7 @@ Shader "Shader Graphs/FogOfWar1"
         struct Varyings
         {
              float4 positionCS : SV_POSITION;
+             float3 positionWS;
              float3 normalWS;
              float4 texCoord0;
             #if UNITY_ANY_INSTANCING_ENABLED || defined(VARYINGS_NEED_INSTANCEID)
@@ -2123,6 +1937,7 @@ Shader "Shader Graphs/FogOfWar1"
         };
         struct SurfaceDescriptionInputs
         {
+             float3 AbsoluteWorldSpacePosition;
              float4 uv0;
              float3 TimeParameters;
         };
@@ -2136,7 +1951,8 @@ Shader "Shader Graphs/FogOfWar1"
         {
              float4 positionCS : SV_POSITION;
              float4 texCoord0 : INTERP0;
-             float3 normalWS : INTERP1;
+             float3 positionWS : INTERP1;
+             float3 normalWS : INTERP2;
             #if UNITY_ANY_INSTANCING_ENABLED || defined(VARYINGS_NEED_INSTANCEID)
              uint instanceID : CUSTOM_INSTANCE_ID;
             #endif
@@ -2157,6 +1973,7 @@ Shader "Shader Graphs/FogOfWar1"
             ZERO_INITIALIZE(PackedVaryings, output);
             output.positionCS = input.positionCS;
             output.texCoord0.xyzw = input.texCoord0;
+            output.positionWS.xyz = input.positionWS;
             output.normalWS.xyz = input.normalWS;
             #if UNITY_ANY_INSTANCING_ENABLED || defined(VARYINGS_NEED_INSTANCEID)
             output.instanceID = input.instanceID;
@@ -2178,6 +1995,7 @@ Shader "Shader Graphs/FogOfWar1"
             Varyings output;
             output.positionCS = input.positionCS;
             output.texCoord0 = input.texCoord0.xyzw;
+            output.positionWS = input.positionWS.xyz;
             output.normalWS = input.normalWS.xyz;
             #if UNITY_ANY_INSTANCING_ENABLED || defined(VARYINGS_NEED_INSTANCEID)
             output.instanceID = input.instanceID;
@@ -2200,6 +2018,11 @@ Shader "Shader Graphs/FogOfWar1"
         
         // Graph Properties
         CBUFFER_START(UnityPerMaterial)
+        float _SmoothDist;
+        float2 _P1;
+        float2 _P2;
+        float2 _P3;
+        float2 _P4;
         float2 _NoiseRange;
         float _Speed;
         float _NoiseScale;
@@ -2221,6 +2044,7 @@ Shader "Shader Graphs/FogOfWar1"
         
         // Graph Includes
         #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Hashes.hlsl"
+        #include_with_pragmas "Assets/_Project/Graphics/Shaders/QuadMask.hlsl"
         
         // -- Property used by ScenePickingPass
         #ifdef SCENEPICKINGPASS
@@ -2267,66 +2091,6 @@ Shader "Shader Graphs/FogOfWar1"
         void Unity_Remap_float(float In, float2 InMinMax, float2 OutMinMax, out float Out)
         {
             Out = OutMinMax.x + (In - InMinMax.x) * (OutMinMax.y - OutMinMax.x) / (InMinMax.y - InMinMax.x);
-        }
-        
-        void Unity_Subtract_float4(float4 A, float4 B, out float4 Out)
-        {
-            Out = A - B;
-        }
-        
-        void Unity_Absolute_float(float In, out float Out)
-        {
-            Out = abs(In);
-        }
-        
-        void Unity_Maximum_float(float A, float B, out float Out)
-        {
-            Out = max(A, B);
-        }
-        
-        void Unity_Smoothstep_float(float Edge1, float Edge2, float In, out float Out)
-        {
-            Out = smoothstep(Edge1, Edge2, In);
-        }
-        
-        void Unity_Add_float(float A, float B, out float Out)
-        {
-            Out = A + B;
-        }
-        
-        struct Bindings_RectangleMask_e1162f732917c2244a46a1190ea7a822_float
-        {
-        half4 uv0;
-        };
-        
-        void SG_RectangleMask_e1162f732917c2244a46a1190ea7a822_float(float _RInnerSize, float _ROuterSize, float _ROutline, Bindings_RectangleMask_e1162f732917c2244a46a1190ea7a822_float IN, out float2 Out_Vector4_1)
-        {
-        float _Property_2252693489ad4269894cfa4003845323_Out_0_Float = _ROuterSize;
-        float _Property_597b07555a0d487ba45a9fe82db98ac9_Out_0_Float = _RInnerSize;
-        float4 _UV_ef7a53adb81947ddae47f6dfbe011d8b_Out_0_Vector4 = IN.uv0;
-        float4 _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4;
-        Unity_Subtract_float4(_UV_ef7a53adb81947ddae47f6dfbe011d8b_Out_0_Vector4, float4(0.5, 0.5, 1, 1), _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4);
-        float _Split_58523661dfe84e01b5fb53885bc84b2f_R_1_Float = _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4[0];
-        float _Split_58523661dfe84e01b5fb53885bc84b2f_G_2_Float = _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4[1];
-        float _Split_58523661dfe84e01b5fb53885bc84b2f_B_3_Float = _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4[2];
-        float _Split_58523661dfe84e01b5fb53885bc84b2f_A_4_Float = _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4[3];
-        float _Absolute_a03e193a02724419b142f9131aec117f_Out_1_Float;
-        Unity_Absolute_float(_Split_58523661dfe84e01b5fb53885bc84b2f_R_1_Float, _Absolute_a03e193a02724419b142f9131aec117f_Out_1_Float);
-        float _Absolute_f054ed5024bf49d896f6902792e3136f_Out_1_Float;
-        Unity_Absolute_float(_Split_58523661dfe84e01b5fb53885bc84b2f_G_2_Float, _Absolute_f054ed5024bf49d896f6902792e3136f_Out_1_Float);
-        float _Maximum_2ab7516ec96e459ca0c9a566ce94c15b_Out_2_Float;
-        Unity_Maximum_float(_Absolute_a03e193a02724419b142f9131aec117f_Out_1_Float, _Absolute_f054ed5024bf49d896f6902792e3136f_Out_1_Float, _Maximum_2ab7516ec96e459ca0c9a566ce94c15b_Out_2_Float);
-        float _Smoothstep_2153b3261b2344ec91f142dc996d740e_Out_3_Float;
-        Unity_Smoothstep_float(_Property_2252693489ad4269894cfa4003845323_Out_0_Float, _Property_597b07555a0d487ba45a9fe82db98ac9_Out_0_Float, _Maximum_2ab7516ec96e459ca0c9a566ce94c15b_Out_2_Float, _Smoothstep_2153b3261b2344ec91f142dc996d740e_Out_3_Float);
-        float _Property_d8845cccc6fb4d82bdbeffb0bff85ffe_Out_0_Float = _ROutline;
-        float _Add_4bd34cb7ed514624a6729a9c7f1f63bb_Out_2_Float;
-        Unity_Add_float(_Property_2252693489ad4269894cfa4003845323_Out_0_Float, _Property_d8845cccc6fb4d82bdbeffb0bff85ffe_Out_0_Float, _Add_4bd34cb7ed514624a6729a9c7f1f63bb_Out_2_Float);
-        float _Add_a0d54f1b8a844c4c835a883e8348f9c8_Out_2_Float;
-        Unity_Add_float(_Property_597b07555a0d487ba45a9fe82db98ac9_Out_0_Float, _Property_d8845cccc6fb4d82bdbeffb0bff85ffe_Out_0_Float, _Add_a0d54f1b8a844c4c835a883e8348f9c8_Out_2_Float);
-        float _Smoothstep_47f7c7791d064a39a30225fcd2fdf840_Out_3_Float;
-        Unity_Smoothstep_float(_Add_4bd34cb7ed514624a6729a9c7f1f63bb_Out_2_Float, _Add_a0d54f1b8a844c4c835a883e8348f9c8_Out_2_Float, _Maximum_2ab7516ec96e459ca0c9a566ce94c15b_Out_2_Float, _Smoothstep_47f7c7791d064a39a30225fcd2fdf840_Out_3_Float);
-        float2 _Vector2_dcca42d8c0cb47918ec61b61bcd3c192_Out_0_Vector2 = float2(_Smoothstep_2153b3261b2344ec91f142dc996d740e_Out_3_Float, _Smoothstep_47f7c7791d064a39a30225fcd2fdf840_Out_3_Float);
-        Out_Vector4_1 = _Vector2_dcca42d8c0cb47918ec61b61bcd3c192_Out_0_Vector2;
         }
         
         void Unity_OneMinus_float4(float4 In, out float4 Out)
@@ -2399,17 +2163,18 @@ Shader "Shader Graphs/FogOfWar1"
             float2 _Property_6f97261e55464055a267dad7cc95ecd5_Out_0_Vector2 = _NoiseRange;
             float _Remap_a354b957cb514be2a96ca58a1649b1ef_Out_3_Float;
             Unity_Remap_float(_GradientNoise_0c7e44cebf9e417c81d768141fa91208_Out_2_Float, float2 (-1, 1), _Property_6f97261e55464055a267dad7cc95ecd5_Out_0_Vector2, _Remap_a354b957cb514be2a96ca58a1649b1ef_Out_3_Float);
-            float _Property_72d5138da5b0428b941ab7b32e2a4fa4_Out_0_Float = _RInnerSize;
-            float _Property_18102176587545449b3a231c026e55b7_Out_0_Float = _ROuterSize;
-            float _Property_69477c54a6164b6b8dcd5cefd3ec68cb_Out_0_Float = _ROutline;
-            Bindings_RectangleMask_e1162f732917c2244a46a1190ea7a822_float _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf;
-            _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf.uv0 = IN.uv0;
-            float2 _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf_OutVector4_1_Vector2;
-            SG_RectangleMask_e1162f732917c2244a46a1190ea7a822_float(_Property_72d5138da5b0428b941ab7b32e2a4fa4_Out_0_Float, _Property_18102176587545449b3a231c026e55b7_Out_0_Float, _Property_69477c54a6164b6b8dcd5cefd3ec68cb_Out_0_Float, _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf, _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf_OutVector4_1_Vector2);
-            float _Split_913073d8da024c81a564e8cbac528cb3_R_1_Float = _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf_OutVector4_1_Vector2[0];
-            float _Split_913073d8da024c81a564e8cbac528cb3_G_2_Float = _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf_OutVector4_1_Vector2[1];
-            float _Split_913073d8da024c81a564e8cbac528cb3_B_3_Float = 0;
-            float _Split_913073d8da024c81a564e8cbac528cb3_A_4_Float = 0;
+            float _Split_538d90ebc5b74b4f96e51fd30b0aee49_R_1_Float = IN.AbsoluteWorldSpacePosition[0];
+            float _Split_538d90ebc5b74b4f96e51fd30b0aee49_G_2_Float = IN.AbsoluteWorldSpacePosition[1];
+            float _Split_538d90ebc5b74b4f96e51fd30b0aee49_B_3_Float = IN.AbsoluteWorldSpacePosition[2];
+            float _Split_538d90ebc5b74b4f96e51fd30b0aee49_A_4_Float = 0;
+            float2 _Vector2_418bf94619db4438a2a9c6e8a4055ab3_Out_0_Vector2 = float2(_Split_538d90ebc5b74b4f96e51fd30b0aee49_R_1_Float, _Split_538d90ebc5b74b4f96e51fd30b0aee49_B_3_Float);
+            float2 _Property_05d1f26d69014c848ad9355ba53f5987_Out_0_Vector2 = _P1;
+            float2 _Property_ebbca2b5b3e845b6926cc6f60d077774_Out_0_Vector2 = _P2;
+            float2 _Property_d1d20e45c3c04593808c78e1c3b5de4a_Out_0_Vector2 = _P3;
+            float2 _Property_9b57252c3d394199a5581ad0c7192d57_Out_0_Vector2 = _P4;
+            float _Property_b7eba52c8fed43acaa4cbafac035d43c_Out_0_Float = _SmoothDist;
+            float _GetInsideFactorCustomFunction_50302bf2fe0642c89db93523cb41c6e3_res_5_Float;
+            GetInsideFactor_float(_Vector2_418bf94619db4438a2a9c6e8a4055ab3_Out_0_Vector2, _Property_05d1f26d69014c848ad9355ba53f5987_Out_0_Vector2, _Property_ebbca2b5b3e845b6926cc6f60d077774_Out_0_Vector2, _Property_d1d20e45c3c04593808c78e1c3b5de4a_Out_0_Vector2, _Property_9b57252c3d394199a5581ad0c7192d57_Out_0_Vector2, _Property_b7eba52c8fed43acaa4cbafac035d43c_Out_0_Float, _GetInsideFactorCustomFunction_50302bf2fe0642c89db93523cb41c6e3_res_5_Float);
             UnityTexture2D _Property_c1c9af8e9aae47ab9d3205b9c791401b_Out_0_Texture2D = UnityBuildTexture2DStructNoScale(_RT_Particles);
               float4 _SampleTexture2DLOD_5c9f689ff1d74918b031cba63062a8ea_RGBA_0_Vector4 = SAMPLE_TEXTURE2D_LOD(_Property_c1c9af8e9aae47ab9d3205b9c791401b_Out_0_Texture2D.tex, _Property_c1c9af8e9aae47ab9d3205b9c791401b_Out_0_Texture2D.samplerstate, _Property_c1c9af8e9aae47ab9d3205b9c791401b_Out_0_Texture2D.GetTransformedUV(IN.uv0.xy), float(0));
             float _SampleTexture2DLOD_5c9f689ff1d74918b031cba63062a8ea_R_5_Float = _SampleTexture2DLOD_5c9f689ff1d74918b031cba63062a8ea_RGBA_0_Vector4.r;
@@ -2419,7 +2184,7 @@ Shader "Shader Graphs/FogOfWar1"
             float4 _OneMinus_33dafa6574d2459d8200dec61dbf7487_Out_1_Vector4;
             Unity_OneMinus_float4(_SampleTexture2DLOD_5c9f689ff1d74918b031cba63062a8ea_RGBA_0_Vector4, _OneMinus_33dafa6574d2459d8200dec61dbf7487_Out_1_Vector4);
             float4 _Multiply_590325aacfff435192271681bcdbfd09_Out_2_Vector4;
-            Unity_Multiply_float4_float4((_Split_913073d8da024c81a564e8cbac528cb3_R_1_Float.xxxx), _OneMinus_33dafa6574d2459d8200dec61dbf7487_Out_1_Vector4, _Multiply_590325aacfff435192271681bcdbfd09_Out_2_Vector4);
+            Unity_Multiply_float4_float4((_GetInsideFactorCustomFunction_50302bf2fe0642c89db93523cb41c6e3_res_5_Float.xxxx), _OneMinus_33dafa6574d2459d8200dec61dbf7487_Out_1_Vector4, _Multiply_590325aacfff435192271681bcdbfd09_Out_2_Vector4);
             float4 _Step_25aa498e99404ada84cfcd7440b8dbc2_Out_2_Vector4;
             Unity_Step_float4((_Remap_a354b957cb514be2a96ca58a1649b1ef_Out_3_Float.xxxx), _Multiply_590325aacfff435192271681bcdbfd09_Out_2_Vector4, _Step_25aa498e99404ada84cfcd7440b8dbc2_Out_2_Vector4);
             float4 _Property_118cf34047e74c258a3206b84581d975_Out_0_Vector4 = _Color1;
@@ -2481,6 +2246,7 @@ Shader "Shader Graphs/FogOfWar1"
         
         
         
+            output.AbsoluteWorldSpacePosition = GetAbsolutePositionWS(input.positionWS);
         
             #if UNITY_UV_STARTS_AT_TOP
             #else
@@ -2632,6 +2398,7 @@ Shader "Shader Graphs/FogOfWar1"
         };
         struct SurfaceDescriptionInputs
         {
+             float3 AbsoluteWorldSpacePosition;
              float4 uv0;
              float3 TimeParameters;
         };
@@ -2730,6 +2497,11 @@ Shader "Shader Graphs/FogOfWar1"
         
         // Graph Properties
         CBUFFER_START(UnityPerMaterial)
+        float _SmoothDist;
+        float2 _P1;
+        float2 _P2;
+        float2 _P3;
+        float2 _P4;
         float2 _NoiseRange;
         float _Speed;
         float _NoiseScale;
@@ -2751,6 +2523,7 @@ Shader "Shader Graphs/FogOfWar1"
         
         // Graph Includes
         #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Hashes.hlsl"
+        #include_with_pragmas "Assets/_Project/Graphics/Shaders/QuadMask.hlsl"
         
         // -- Property used by ScenePickingPass
         #ifdef SCENEPICKINGPASS
@@ -2802,66 +2575,6 @@ Shader "Shader Graphs/FogOfWar1"
         void Unity_Lerp_float4(float4 A, float4 B, float4 T, out float4 Out)
         {
             Out = lerp(A, B, T);
-        }
-        
-        void Unity_Subtract_float4(float4 A, float4 B, out float4 Out)
-        {
-            Out = A - B;
-        }
-        
-        void Unity_Absolute_float(float In, out float Out)
-        {
-            Out = abs(In);
-        }
-        
-        void Unity_Maximum_float(float A, float B, out float Out)
-        {
-            Out = max(A, B);
-        }
-        
-        void Unity_Smoothstep_float(float Edge1, float Edge2, float In, out float Out)
-        {
-            Out = smoothstep(Edge1, Edge2, In);
-        }
-        
-        void Unity_Add_float(float A, float B, out float Out)
-        {
-            Out = A + B;
-        }
-        
-        struct Bindings_RectangleMask_e1162f732917c2244a46a1190ea7a822_float
-        {
-        half4 uv0;
-        };
-        
-        void SG_RectangleMask_e1162f732917c2244a46a1190ea7a822_float(float _RInnerSize, float _ROuterSize, float _ROutline, Bindings_RectangleMask_e1162f732917c2244a46a1190ea7a822_float IN, out float2 Out_Vector4_1)
-        {
-        float _Property_2252693489ad4269894cfa4003845323_Out_0_Float = _ROuterSize;
-        float _Property_597b07555a0d487ba45a9fe82db98ac9_Out_0_Float = _RInnerSize;
-        float4 _UV_ef7a53adb81947ddae47f6dfbe011d8b_Out_0_Vector4 = IN.uv0;
-        float4 _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4;
-        Unity_Subtract_float4(_UV_ef7a53adb81947ddae47f6dfbe011d8b_Out_0_Vector4, float4(0.5, 0.5, 1, 1), _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4);
-        float _Split_58523661dfe84e01b5fb53885bc84b2f_R_1_Float = _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4[0];
-        float _Split_58523661dfe84e01b5fb53885bc84b2f_G_2_Float = _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4[1];
-        float _Split_58523661dfe84e01b5fb53885bc84b2f_B_3_Float = _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4[2];
-        float _Split_58523661dfe84e01b5fb53885bc84b2f_A_4_Float = _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4[3];
-        float _Absolute_a03e193a02724419b142f9131aec117f_Out_1_Float;
-        Unity_Absolute_float(_Split_58523661dfe84e01b5fb53885bc84b2f_R_1_Float, _Absolute_a03e193a02724419b142f9131aec117f_Out_1_Float);
-        float _Absolute_f054ed5024bf49d896f6902792e3136f_Out_1_Float;
-        Unity_Absolute_float(_Split_58523661dfe84e01b5fb53885bc84b2f_G_2_Float, _Absolute_f054ed5024bf49d896f6902792e3136f_Out_1_Float);
-        float _Maximum_2ab7516ec96e459ca0c9a566ce94c15b_Out_2_Float;
-        Unity_Maximum_float(_Absolute_a03e193a02724419b142f9131aec117f_Out_1_Float, _Absolute_f054ed5024bf49d896f6902792e3136f_Out_1_Float, _Maximum_2ab7516ec96e459ca0c9a566ce94c15b_Out_2_Float);
-        float _Smoothstep_2153b3261b2344ec91f142dc996d740e_Out_3_Float;
-        Unity_Smoothstep_float(_Property_2252693489ad4269894cfa4003845323_Out_0_Float, _Property_597b07555a0d487ba45a9fe82db98ac9_Out_0_Float, _Maximum_2ab7516ec96e459ca0c9a566ce94c15b_Out_2_Float, _Smoothstep_2153b3261b2344ec91f142dc996d740e_Out_3_Float);
-        float _Property_d8845cccc6fb4d82bdbeffb0bff85ffe_Out_0_Float = _ROutline;
-        float _Add_4bd34cb7ed514624a6729a9c7f1f63bb_Out_2_Float;
-        Unity_Add_float(_Property_2252693489ad4269894cfa4003845323_Out_0_Float, _Property_d8845cccc6fb4d82bdbeffb0bff85ffe_Out_0_Float, _Add_4bd34cb7ed514624a6729a9c7f1f63bb_Out_2_Float);
-        float _Add_a0d54f1b8a844c4c835a883e8348f9c8_Out_2_Float;
-        Unity_Add_float(_Property_597b07555a0d487ba45a9fe82db98ac9_Out_0_Float, _Property_d8845cccc6fb4d82bdbeffb0bff85ffe_Out_0_Float, _Add_a0d54f1b8a844c4c835a883e8348f9c8_Out_2_Float);
-        float _Smoothstep_47f7c7791d064a39a30225fcd2fdf840_Out_3_Float;
-        Unity_Smoothstep_float(_Add_4bd34cb7ed514624a6729a9c7f1f63bb_Out_2_Float, _Add_a0d54f1b8a844c4c835a883e8348f9c8_Out_2_Float, _Maximum_2ab7516ec96e459ca0c9a566ce94c15b_Out_2_Float, _Smoothstep_47f7c7791d064a39a30225fcd2fdf840_Out_3_Float);
-        float2 _Vector2_dcca42d8c0cb47918ec61b61bcd3c192_Out_0_Vector2 = float2(_Smoothstep_2153b3261b2344ec91f142dc996d740e_Out_3_Float, _Smoothstep_47f7c7791d064a39a30225fcd2fdf840_Out_3_Float);
-        Out_Vector4_1 = _Vector2_dcca42d8c0cb47918ec61b61bcd3c192_Out_0_Vector2;
         }
         
         void Unity_OneMinus_float4(float4 In, out float4 Out)
@@ -2936,17 +2649,18 @@ Shader "Shader Graphs/FogOfWar1"
             float2 _Property_6f97261e55464055a267dad7cc95ecd5_Out_0_Vector2 = _NoiseRange;
             float _Remap_a354b957cb514be2a96ca58a1649b1ef_Out_3_Float;
             Unity_Remap_float(_GradientNoise_0c7e44cebf9e417c81d768141fa91208_Out_2_Float, float2 (-1, 1), _Property_6f97261e55464055a267dad7cc95ecd5_Out_0_Vector2, _Remap_a354b957cb514be2a96ca58a1649b1ef_Out_3_Float);
-            float _Property_72d5138da5b0428b941ab7b32e2a4fa4_Out_0_Float = _RInnerSize;
-            float _Property_18102176587545449b3a231c026e55b7_Out_0_Float = _ROuterSize;
-            float _Property_69477c54a6164b6b8dcd5cefd3ec68cb_Out_0_Float = _ROutline;
-            Bindings_RectangleMask_e1162f732917c2244a46a1190ea7a822_float _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf;
-            _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf.uv0 = IN.uv0;
-            float2 _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf_OutVector4_1_Vector2;
-            SG_RectangleMask_e1162f732917c2244a46a1190ea7a822_float(_Property_72d5138da5b0428b941ab7b32e2a4fa4_Out_0_Float, _Property_18102176587545449b3a231c026e55b7_Out_0_Float, _Property_69477c54a6164b6b8dcd5cefd3ec68cb_Out_0_Float, _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf, _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf_OutVector4_1_Vector2);
-            float _Split_913073d8da024c81a564e8cbac528cb3_R_1_Float = _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf_OutVector4_1_Vector2[0];
-            float _Split_913073d8da024c81a564e8cbac528cb3_G_2_Float = _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf_OutVector4_1_Vector2[1];
-            float _Split_913073d8da024c81a564e8cbac528cb3_B_3_Float = 0;
-            float _Split_913073d8da024c81a564e8cbac528cb3_A_4_Float = 0;
+            float _Split_538d90ebc5b74b4f96e51fd30b0aee49_R_1_Float = IN.AbsoluteWorldSpacePosition[0];
+            float _Split_538d90ebc5b74b4f96e51fd30b0aee49_G_2_Float = IN.AbsoluteWorldSpacePosition[1];
+            float _Split_538d90ebc5b74b4f96e51fd30b0aee49_B_3_Float = IN.AbsoluteWorldSpacePosition[2];
+            float _Split_538d90ebc5b74b4f96e51fd30b0aee49_A_4_Float = 0;
+            float2 _Vector2_418bf94619db4438a2a9c6e8a4055ab3_Out_0_Vector2 = float2(_Split_538d90ebc5b74b4f96e51fd30b0aee49_R_1_Float, _Split_538d90ebc5b74b4f96e51fd30b0aee49_B_3_Float);
+            float2 _Property_05d1f26d69014c848ad9355ba53f5987_Out_0_Vector2 = _P1;
+            float2 _Property_ebbca2b5b3e845b6926cc6f60d077774_Out_0_Vector2 = _P2;
+            float2 _Property_d1d20e45c3c04593808c78e1c3b5de4a_Out_0_Vector2 = _P3;
+            float2 _Property_9b57252c3d394199a5581ad0c7192d57_Out_0_Vector2 = _P4;
+            float _Property_b7eba52c8fed43acaa4cbafac035d43c_Out_0_Float = _SmoothDist;
+            float _GetInsideFactorCustomFunction_50302bf2fe0642c89db93523cb41c6e3_res_5_Float;
+            GetInsideFactor_float(_Vector2_418bf94619db4438a2a9c6e8a4055ab3_Out_0_Vector2, _Property_05d1f26d69014c848ad9355ba53f5987_Out_0_Vector2, _Property_ebbca2b5b3e845b6926cc6f60d077774_Out_0_Vector2, _Property_d1d20e45c3c04593808c78e1c3b5de4a_Out_0_Vector2, _Property_9b57252c3d394199a5581ad0c7192d57_Out_0_Vector2, _Property_b7eba52c8fed43acaa4cbafac035d43c_Out_0_Float, _GetInsideFactorCustomFunction_50302bf2fe0642c89db93523cb41c6e3_res_5_Float);
             UnityTexture2D _Property_c1c9af8e9aae47ab9d3205b9c791401b_Out_0_Texture2D = UnityBuildTexture2DStructNoScale(_RT_Particles);
               float4 _SampleTexture2DLOD_5c9f689ff1d74918b031cba63062a8ea_RGBA_0_Vector4 = SAMPLE_TEXTURE2D_LOD(_Property_c1c9af8e9aae47ab9d3205b9c791401b_Out_0_Texture2D.tex, _Property_c1c9af8e9aae47ab9d3205b9c791401b_Out_0_Texture2D.samplerstate, _Property_c1c9af8e9aae47ab9d3205b9c791401b_Out_0_Texture2D.GetTransformedUV(IN.uv0.xy), float(0));
             float _SampleTexture2DLOD_5c9f689ff1d74918b031cba63062a8ea_R_5_Float = _SampleTexture2DLOD_5c9f689ff1d74918b031cba63062a8ea_RGBA_0_Vector4.r;
@@ -2956,7 +2670,7 @@ Shader "Shader Graphs/FogOfWar1"
             float4 _OneMinus_33dafa6574d2459d8200dec61dbf7487_Out_1_Vector4;
             Unity_OneMinus_float4(_SampleTexture2DLOD_5c9f689ff1d74918b031cba63062a8ea_RGBA_0_Vector4, _OneMinus_33dafa6574d2459d8200dec61dbf7487_Out_1_Vector4);
             float4 _Multiply_590325aacfff435192271681bcdbfd09_Out_2_Vector4;
-            Unity_Multiply_float4_float4((_Split_913073d8da024c81a564e8cbac528cb3_R_1_Float.xxxx), _OneMinus_33dafa6574d2459d8200dec61dbf7487_Out_1_Vector4, _Multiply_590325aacfff435192271681bcdbfd09_Out_2_Vector4);
+            Unity_Multiply_float4_float4((_GetInsideFactorCustomFunction_50302bf2fe0642c89db93523cb41c6e3_res_5_Float.xxxx), _OneMinus_33dafa6574d2459d8200dec61dbf7487_Out_1_Vector4, _Multiply_590325aacfff435192271681bcdbfd09_Out_2_Vector4);
             float4 _Step_25aa498e99404ada84cfcd7440b8dbc2_Out_2_Vector4;
             Unity_Step_float4((_Remap_a354b957cb514be2a96ca58a1649b1ef_Out_3_Float.xxxx), _Multiply_590325aacfff435192271681bcdbfd09_Out_2_Vector4, _Step_25aa498e99404ada84cfcd7440b8dbc2_Out_2_Vector4);
             float _Split_2b19b259fdcd41098c7654eb0d05c9e0_R_1_Float = _Lerp_78072a5c55ee4ca0b7f8f3d76a772869_Out_3_Vector4[0];
@@ -3013,6 +2727,7 @@ Shader "Shader Graphs/FogOfWar1"
         
         
         
+            output.AbsoluteWorldSpacePosition = GetAbsolutePositionWS(input.positionWS);
         
             #if UNITY_UV_STARTS_AT_TOP
             #else
@@ -3083,6 +2798,7 @@ Shader "Shader Graphs/FogOfWar1"
         #define ATTRIBUTES_NEED_TEXCOORD0
         #define FEATURES_GRAPH_VERTEX_NORMAL_OUTPUT
         #define FEATURES_GRAPH_VERTEX_TANGENT_OUTPUT
+        #define VARYINGS_NEED_POSITION_WS
         #define VARYINGS_NEED_TEXCOORD0
         #define FEATURES_GRAPH_VERTEX
         /* WARNING: $splice Could not find named fragment 'PassInstancing' */
@@ -3127,6 +2843,7 @@ Shader "Shader Graphs/FogOfWar1"
         struct Varyings
         {
              float4 positionCS : SV_POSITION;
+             float3 positionWS;
              float4 texCoord0;
             #if UNITY_ANY_INSTANCING_ENABLED || defined(VARYINGS_NEED_INSTANCEID)
              uint instanceID : CUSTOM_INSTANCE_ID;
@@ -3143,6 +2860,7 @@ Shader "Shader Graphs/FogOfWar1"
         };
         struct SurfaceDescriptionInputs
         {
+             float3 AbsoluteWorldSpacePosition;
              float4 uv0;
              float3 TimeParameters;
         };
@@ -3156,6 +2874,7 @@ Shader "Shader Graphs/FogOfWar1"
         {
              float4 positionCS : SV_POSITION;
              float4 texCoord0 : INTERP0;
+             float3 positionWS : INTERP1;
             #if UNITY_ANY_INSTANCING_ENABLED || defined(VARYINGS_NEED_INSTANCEID)
              uint instanceID : CUSTOM_INSTANCE_ID;
             #endif
@@ -3176,6 +2895,7 @@ Shader "Shader Graphs/FogOfWar1"
             ZERO_INITIALIZE(PackedVaryings, output);
             output.positionCS = input.positionCS;
             output.texCoord0.xyzw = input.texCoord0;
+            output.positionWS.xyz = input.positionWS;
             #if UNITY_ANY_INSTANCING_ENABLED || defined(VARYINGS_NEED_INSTANCEID)
             output.instanceID = input.instanceID;
             #endif
@@ -3196,6 +2916,7 @@ Shader "Shader Graphs/FogOfWar1"
             Varyings output;
             output.positionCS = input.positionCS;
             output.texCoord0 = input.texCoord0.xyzw;
+            output.positionWS = input.positionWS.xyz;
             #if UNITY_ANY_INSTANCING_ENABLED || defined(VARYINGS_NEED_INSTANCEID)
             output.instanceID = input.instanceID;
             #endif
@@ -3217,6 +2938,11 @@ Shader "Shader Graphs/FogOfWar1"
         
         // Graph Properties
         CBUFFER_START(UnityPerMaterial)
+        float _SmoothDist;
+        float2 _P1;
+        float2 _P2;
+        float2 _P3;
+        float2 _P4;
         float2 _NoiseRange;
         float _Speed;
         float _NoiseScale;
@@ -3238,6 +2964,7 @@ Shader "Shader Graphs/FogOfWar1"
         
         // Graph Includes
         #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Hashes.hlsl"
+        #include_with_pragmas "Assets/_Project/Graphics/Shaders/QuadMask.hlsl"
         
         // -- Property used by ScenePickingPass
         #ifdef SCENEPICKINGPASS
@@ -3284,66 +3011,6 @@ Shader "Shader Graphs/FogOfWar1"
         void Unity_Remap_float(float In, float2 InMinMax, float2 OutMinMax, out float Out)
         {
             Out = OutMinMax.x + (In - InMinMax.x) * (OutMinMax.y - OutMinMax.x) / (InMinMax.y - InMinMax.x);
-        }
-        
-        void Unity_Subtract_float4(float4 A, float4 B, out float4 Out)
-        {
-            Out = A - B;
-        }
-        
-        void Unity_Absolute_float(float In, out float Out)
-        {
-            Out = abs(In);
-        }
-        
-        void Unity_Maximum_float(float A, float B, out float Out)
-        {
-            Out = max(A, B);
-        }
-        
-        void Unity_Smoothstep_float(float Edge1, float Edge2, float In, out float Out)
-        {
-            Out = smoothstep(Edge1, Edge2, In);
-        }
-        
-        void Unity_Add_float(float A, float B, out float Out)
-        {
-            Out = A + B;
-        }
-        
-        struct Bindings_RectangleMask_e1162f732917c2244a46a1190ea7a822_float
-        {
-        half4 uv0;
-        };
-        
-        void SG_RectangleMask_e1162f732917c2244a46a1190ea7a822_float(float _RInnerSize, float _ROuterSize, float _ROutline, Bindings_RectangleMask_e1162f732917c2244a46a1190ea7a822_float IN, out float2 Out_Vector4_1)
-        {
-        float _Property_2252693489ad4269894cfa4003845323_Out_0_Float = _ROuterSize;
-        float _Property_597b07555a0d487ba45a9fe82db98ac9_Out_0_Float = _RInnerSize;
-        float4 _UV_ef7a53adb81947ddae47f6dfbe011d8b_Out_0_Vector4 = IN.uv0;
-        float4 _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4;
-        Unity_Subtract_float4(_UV_ef7a53adb81947ddae47f6dfbe011d8b_Out_0_Vector4, float4(0.5, 0.5, 1, 1), _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4);
-        float _Split_58523661dfe84e01b5fb53885bc84b2f_R_1_Float = _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4[0];
-        float _Split_58523661dfe84e01b5fb53885bc84b2f_G_2_Float = _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4[1];
-        float _Split_58523661dfe84e01b5fb53885bc84b2f_B_3_Float = _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4[2];
-        float _Split_58523661dfe84e01b5fb53885bc84b2f_A_4_Float = _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4[3];
-        float _Absolute_a03e193a02724419b142f9131aec117f_Out_1_Float;
-        Unity_Absolute_float(_Split_58523661dfe84e01b5fb53885bc84b2f_R_1_Float, _Absolute_a03e193a02724419b142f9131aec117f_Out_1_Float);
-        float _Absolute_f054ed5024bf49d896f6902792e3136f_Out_1_Float;
-        Unity_Absolute_float(_Split_58523661dfe84e01b5fb53885bc84b2f_G_2_Float, _Absolute_f054ed5024bf49d896f6902792e3136f_Out_1_Float);
-        float _Maximum_2ab7516ec96e459ca0c9a566ce94c15b_Out_2_Float;
-        Unity_Maximum_float(_Absolute_a03e193a02724419b142f9131aec117f_Out_1_Float, _Absolute_f054ed5024bf49d896f6902792e3136f_Out_1_Float, _Maximum_2ab7516ec96e459ca0c9a566ce94c15b_Out_2_Float);
-        float _Smoothstep_2153b3261b2344ec91f142dc996d740e_Out_3_Float;
-        Unity_Smoothstep_float(_Property_2252693489ad4269894cfa4003845323_Out_0_Float, _Property_597b07555a0d487ba45a9fe82db98ac9_Out_0_Float, _Maximum_2ab7516ec96e459ca0c9a566ce94c15b_Out_2_Float, _Smoothstep_2153b3261b2344ec91f142dc996d740e_Out_3_Float);
-        float _Property_d8845cccc6fb4d82bdbeffb0bff85ffe_Out_0_Float = _ROutline;
-        float _Add_4bd34cb7ed514624a6729a9c7f1f63bb_Out_2_Float;
-        Unity_Add_float(_Property_2252693489ad4269894cfa4003845323_Out_0_Float, _Property_d8845cccc6fb4d82bdbeffb0bff85ffe_Out_0_Float, _Add_4bd34cb7ed514624a6729a9c7f1f63bb_Out_2_Float);
-        float _Add_a0d54f1b8a844c4c835a883e8348f9c8_Out_2_Float;
-        Unity_Add_float(_Property_597b07555a0d487ba45a9fe82db98ac9_Out_0_Float, _Property_d8845cccc6fb4d82bdbeffb0bff85ffe_Out_0_Float, _Add_a0d54f1b8a844c4c835a883e8348f9c8_Out_2_Float);
-        float _Smoothstep_47f7c7791d064a39a30225fcd2fdf840_Out_3_Float;
-        Unity_Smoothstep_float(_Add_4bd34cb7ed514624a6729a9c7f1f63bb_Out_2_Float, _Add_a0d54f1b8a844c4c835a883e8348f9c8_Out_2_Float, _Maximum_2ab7516ec96e459ca0c9a566ce94c15b_Out_2_Float, _Smoothstep_47f7c7791d064a39a30225fcd2fdf840_Out_3_Float);
-        float2 _Vector2_dcca42d8c0cb47918ec61b61bcd3c192_Out_0_Vector2 = float2(_Smoothstep_2153b3261b2344ec91f142dc996d740e_Out_3_Float, _Smoothstep_47f7c7791d064a39a30225fcd2fdf840_Out_3_Float);
-        Out_Vector4_1 = _Vector2_dcca42d8c0cb47918ec61b61bcd3c192_Out_0_Vector2;
         }
         
         void Unity_OneMinus_float4(float4 In, out float4 Out)
@@ -3416,17 +3083,18 @@ Shader "Shader Graphs/FogOfWar1"
             float2 _Property_6f97261e55464055a267dad7cc95ecd5_Out_0_Vector2 = _NoiseRange;
             float _Remap_a354b957cb514be2a96ca58a1649b1ef_Out_3_Float;
             Unity_Remap_float(_GradientNoise_0c7e44cebf9e417c81d768141fa91208_Out_2_Float, float2 (-1, 1), _Property_6f97261e55464055a267dad7cc95ecd5_Out_0_Vector2, _Remap_a354b957cb514be2a96ca58a1649b1ef_Out_3_Float);
-            float _Property_72d5138da5b0428b941ab7b32e2a4fa4_Out_0_Float = _RInnerSize;
-            float _Property_18102176587545449b3a231c026e55b7_Out_0_Float = _ROuterSize;
-            float _Property_69477c54a6164b6b8dcd5cefd3ec68cb_Out_0_Float = _ROutline;
-            Bindings_RectangleMask_e1162f732917c2244a46a1190ea7a822_float _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf;
-            _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf.uv0 = IN.uv0;
-            float2 _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf_OutVector4_1_Vector2;
-            SG_RectangleMask_e1162f732917c2244a46a1190ea7a822_float(_Property_72d5138da5b0428b941ab7b32e2a4fa4_Out_0_Float, _Property_18102176587545449b3a231c026e55b7_Out_0_Float, _Property_69477c54a6164b6b8dcd5cefd3ec68cb_Out_0_Float, _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf, _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf_OutVector4_1_Vector2);
-            float _Split_913073d8da024c81a564e8cbac528cb3_R_1_Float = _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf_OutVector4_1_Vector2[0];
-            float _Split_913073d8da024c81a564e8cbac528cb3_G_2_Float = _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf_OutVector4_1_Vector2[1];
-            float _Split_913073d8da024c81a564e8cbac528cb3_B_3_Float = 0;
-            float _Split_913073d8da024c81a564e8cbac528cb3_A_4_Float = 0;
+            float _Split_538d90ebc5b74b4f96e51fd30b0aee49_R_1_Float = IN.AbsoluteWorldSpacePosition[0];
+            float _Split_538d90ebc5b74b4f96e51fd30b0aee49_G_2_Float = IN.AbsoluteWorldSpacePosition[1];
+            float _Split_538d90ebc5b74b4f96e51fd30b0aee49_B_3_Float = IN.AbsoluteWorldSpacePosition[2];
+            float _Split_538d90ebc5b74b4f96e51fd30b0aee49_A_4_Float = 0;
+            float2 _Vector2_418bf94619db4438a2a9c6e8a4055ab3_Out_0_Vector2 = float2(_Split_538d90ebc5b74b4f96e51fd30b0aee49_R_1_Float, _Split_538d90ebc5b74b4f96e51fd30b0aee49_B_3_Float);
+            float2 _Property_05d1f26d69014c848ad9355ba53f5987_Out_0_Vector2 = _P1;
+            float2 _Property_ebbca2b5b3e845b6926cc6f60d077774_Out_0_Vector2 = _P2;
+            float2 _Property_d1d20e45c3c04593808c78e1c3b5de4a_Out_0_Vector2 = _P3;
+            float2 _Property_9b57252c3d394199a5581ad0c7192d57_Out_0_Vector2 = _P4;
+            float _Property_b7eba52c8fed43acaa4cbafac035d43c_Out_0_Float = _SmoothDist;
+            float _GetInsideFactorCustomFunction_50302bf2fe0642c89db93523cb41c6e3_res_5_Float;
+            GetInsideFactor_float(_Vector2_418bf94619db4438a2a9c6e8a4055ab3_Out_0_Vector2, _Property_05d1f26d69014c848ad9355ba53f5987_Out_0_Vector2, _Property_ebbca2b5b3e845b6926cc6f60d077774_Out_0_Vector2, _Property_d1d20e45c3c04593808c78e1c3b5de4a_Out_0_Vector2, _Property_9b57252c3d394199a5581ad0c7192d57_Out_0_Vector2, _Property_b7eba52c8fed43acaa4cbafac035d43c_Out_0_Float, _GetInsideFactorCustomFunction_50302bf2fe0642c89db93523cb41c6e3_res_5_Float);
             UnityTexture2D _Property_c1c9af8e9aae47ab9d3205b9c791401b_Out_0_Texture2D = UnityBuildTexture2DStructNoScale(_RT_Particles);
               float4 _SampleTexture2DLOD_5c9f689ff1d74918b031cba63062a8ea_RGBA_0_Vector4 = SAMPLE_TEXTURE2D_LOD(_Property_c1c9af8e9aae47ab9d3205b9c791401b_Out_0_Texture2D.tex, _Property_c1c9af8e9aae47ab9d3205b9c791401b_Out_0_Texture2D.samplerstate, _Property_c1c9af8e9aae47ab9d3205b9c791401b_Out_0_Texture2D.GetTransformedUV(IN.uv0.xy), float(0));
             float _SampleTexture2DLOD_5c9f689ff1d74918b031cba63062a8ea_R_5_Float = _SampleTexture2DLOD_5c9f689ff1d74918b031cba63062a8ea_RGBA_0_Vector4.r;
@@ -3436,7 +3104,7 @@ Shader "Shader Graphs/FogOfWar1"
             float4 _OneMinus_33dafa6574d2459d8200dec61dbf7487_Out_1_Vector4;
             Unity_OneMinus_float4(_SampleTexture2DLOD_5c9f689ff1d74918b031cba63062a8ea_RGBA_0_Vector4, _OneMinus_33dafa6574d2459d8200dec61dbf7487_Out_1_Vector4);
             float4 _Multiply_590325aacfff435192271681bcdbfd09_Out_2_Vector4;
-            Unity_Multiply_float4_float4((_Split_913073d8da024c81a564e8cbac528cb3_R_1_Float.xxxx), _OneMinus_33dafa6574d2459d8200dec61dbf7487_Out_1_Vector4, _Multiply_590325aacfff435192271681bcdbfd09_Out_2_Vector4);
+            Unity_Multiply_float4_float4((_GetInsideFactorCustomFunction_50302bf2fe0642c89db93523cb41c6e3_res_5_Float.xxxx), _OneMinus_33dafa6574d2459d8200dec61dbf7487_Out_1_Vector4, _Multiply_590325aacfff435192271681bcdbfd09_Out_2_Vector4);
             float4 _Step_25aa498e99404ada84cfcd7440b8dbc2_Out_2_Vector4;
             Unity_Step_float4((_Remap_a354b957cb514be2a96ca58a1649b1ef_Out_3_Float.xxxx), _Multiply_590325aacfff435192271681bcdbfd09_Out_2_Vector4, _Step_25aa498e99404ada84cfcd7440b8dbc2_Out_2_Vector4);
             float4 _Property_118cf34047e74c258a3206b84581d975_Out_0_Vector4 = _Color1;
@@ -3498,6 +3166,7 @@ Shader "Shader Graphs/FogOfWar1"
         
         
         
+            output.AbsoluteWorldSpacePosition = GetAbsolutePositionWS(input.positionWS);
         
             #if UNITY_UV_STARTS_AT_TOP
             #else
@@ -3568,6 +3237,7 @@ Shader "Shader Graphs/FogOfWar1"
         #define ATTRIBUTES_NEED_TEXCOORD0
         #define FEATURES_GRAPH_VERTEX_NORMAL_OUTPUT
         #define FEATURES_GRAPH_VERTEX_TANGENT_OUTPUT
+        #define VARYINGS_NEED_POSITION_WS
         #define VARYINGS_NEED_TEXCOORD0
         #define FEATURES_GRAPH_VERTEX
         /* WARNING: $splice Could not find named fragment 'PassInstancing' */
@@ -3612,6 +3282,7 @@ Shader "Shader Graphs/FogOfWar1"
         struct Varyings
         {
              float4 positionCS : SV_POSITION;
+             float3 positionWS;
              float4 texCoord0;
             #if UNITY_ANY_INSTANCING_ENABLED || defined(VARYINGS_NEED_INSTANCEID)
              uint instanceID : CUSTOM_INSTANCE_ID;
@@ -3628,6 +3299,7 @@ Shader "Shader Graphs/FogOfWar1"
         };
         struct SurfaceDescriptionInputs
         {
+             float3 AbsoluteWorldSpacePosition;
              float4 uv0;
              float3 TimeParameters;
         };
@@ -3641,6 +3313,7 @@ Shader "Shader Graphs/FogOfWar1"
         {
              float4 positionCS : SV_POSITION;
              float4 texCoord0 : INTERP0;
+             float3 positionWS : INTERP1;
             #if UNITY_ANY_INSTANCING_ENABLED || defined(VARYINGS_NEED_INSTANCEID)
              uint instanceID : CUSTOM_INSTANCE_ID;
             #endif
@@ -3661,6 +3334,7 @@ Shader "Shader Graphs/FogOfWar1"
             ZERO_INITIALIZE(PackedVaryings, output);
             output.positionCS = input.positionCS;
             output.texCoord0.xyzw = input.texCoord0;
+            output.positionWS.xyz = input.positionWS;
             #if UNITY_ANY_INSTANCING_ENABLED || defined(VARYINGS_NEED_INSTANCEID)
             output.instanceID = input.instanceID;
             #endif
@@ -3681,6 +3355,7 @@ Shader "Shader Graphs/FogOfWar1"
             Varyings output;
             output.positionCS = input.positionCS;
             output.texCoord0 = input.texCoord0.xyzw;
+            output.positionWS = input.positionWS.xyz;
             #if UNITY_ANY_INSTANCING_ENABLED || defined(VARYINGS_NEED_INSTANCEID)
             output.instanceID = input.instanceID;
             #endif
@@ -3702,6 +3377,11 @@ Shader "Shader Graphs/FogOfWar1"
         
         // Graph Properties
         CBUFFER_START(UnityPerMaterial)
+        float _SmoothDist;
+        float2 _P1;
+        float2 _P2;
+        float2 _P3;
+        float2 _P4;
         float2 _NoiseRange;
         float _Speed;
         float _NoiseScale;
@@ -3723,6 +3403,7 @@ Shader "Shader Graphs/FogOfWar1"
         
         // Graph Includes
         #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Hashes.hlsl"
+        #include_with_pragmas "Assets/_Project/Graphics/Shaders/QuadMask.hlsl"
         
         // -- Property used by ScenePickingPass
         #ifdef SCENEPICKINGPASS
@@ -3774,66 +3455,6 @@ Shader "Shader Graphs/FogOfWar1"
         void Unity_Lerp_float4(float4 A, float4 B, float4 T, out float4 Out)
         {
             Out = lerp(A, B, T);
-        }
-        
-        void Unity_Subtract_float4(float4 A, float4 B, out float4 Out)
-        {
-            Out = A - B;
-        }
-        
-        void Unity_Absolute_float(float In, out float Out)
-        {
-            Out = abs(In);
-        }
-        
-        void Unity_Maximum_float(float A, float B, out float Out)
-        {
-            Out = max(A, B);
-        }
-        
-        void Unity_Smoothstep_float(float Edge1, float Edge2, float In, out float Out)
-        {
-            Out = smoothstep(Edge1, Edge2, In);
-        }
-        
-        void Unity_Add_float(float A, float B, out float Out)
-        {
-            Out = A + B;
-        }
-        
-        struct Bindings_RectangleMask_e1162f732917c2244a46a1190ea7a822_float
-        {
-        half4 uv0;
-        };
-        
-        void SG_RectangleMask_e1162f732917c2244a46a1190ea7a822_float(float _RInnerSize, float _ROuterSize, float _ROutline, Bindings_RectangleMask_e1162f732917c2244a46a1190ea7a822_float IN, out float2 Out_Vector4_1)
-        {
-        float _Property_2252693489ad4269894cfa4003845323_Out_0_Float = _ROuterSize;
-        float _Property_597b07555a0d487ba45a9fe82db98ac9_Out_0_Float = _RInnerSize;
-        float4 _UV_ef7a53adb81947ddae47f6dfbe011d8b_Out_0_Vector4 = IN.uv0;
-        float4 _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4;
-        Unity_Subtract_float4(_UV_ef7a53adb81947ddae47f6dfbe011d8b_Out_0_Vector4, float4(0.5, 0.5, 1, 1), _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4);
-        float _Split_58523661dfe84e01b5fb53885bc84b2f_R_1_Float = _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4[0];
-        float _Split_58523661dfe84e01b5fb53885bc84b2f_G_2_Float = _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4[1];
-        float _Split_58523661dfe84e01b5fb53885bc84b2f_B_3_Float = _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4[2];
-        float _Split_58523661dfe84e01b5fb53885bc84b2f_A_4_Float = _Subtract_a5800cbd4d3c4252a973c3276f8b8a84_Out_2_Vector4[3];
-        float _Absolute_a03e193a02724419b142f9131aec117f_Out_1_Float;
-        Unity_Absolute_float(_Split_58523661dfe84e01b5fb53885bc84b2f_R_1_Float, _Absolute_a03e193a02724419b142f9131aec117f_Out_1_Float);
-        float _Absolute_f054ed5024bf49d896f6902792e3136f_Out_1_Float;
-        Unity_Absolute_float(_Split_58523661dfe84e01b5fb53885bc84b2f_G_2_Float, _Absolute_f054ed5024bf49d896f6902792e3136f_Out_1_Float);
-        float _Maximum_2ab7516ec96e459ca0c9a566ce94c15b_Out_2_Float;
-        Unity_Maximum_float(_Absolute_a03e193a02724419b142f9131aec117f_Out_1_Float, _Absolute_f054ed5024bf49d896f6902792e3136f_Out_1_Float, _Maximum_2ab7516ec96e459ca0c9a566ce94c15b_Out_2_Float);
-        float _Smoothstep_2153b3261b2344ec91f142dc996d740e_Out_3_Float;
-        Unity_Smoothstep_float(_Property_2252693489ad4269894cfa4003845323_Out_0_Float, _Property_597b07555a0d487ba45a9fe82db98ac9_Out_0_Float, _Maximum_2ab7516ec96e459ca0c9a566ce94c15b_Out_2_Float, _Smoothstep_2153b3261b2344ec91f142dc996d740e_Out_3_Float);
-        float _Property_d8845cccc6fb4d82bdbeffb0bff85ffe_Out_0_Float = _ROutline;
-        float _Add_4bd34cb7ed514624a6729a9c7f1f63bb_Out_2_Float;
-        Unity_Add_float(_Property_2252693489ad4269894cfa4003845323_Out_0_Float, _Property_d8845cccc6fb4d82bdbeffb0bff85ffe_Out_0_Float, _Add_4bd34cb7ed514624a6729a9c7f1f63bb_Out_2_Float);
-        float _Add_a0d54f1b8a844c4c835a883e8348f9c8_Out_2_Float;
-        Unity_Add_float(_Property_597b07555a0d487ba45a9fe82db98ac9_Out_0_Float, _Property_d8845cccc6fb4d82bdbeffb0bff85ffe_Out_0_Float, _Add_a0d54f1b8a844c4c835a883e8348f9c8_Out_2_Float);
-        float _Smoothstep_47f7c7791d064a39a30225fcd2fdf840_Out_3_Float;
-        Unity_Smoothstep_float(_Add_4bd34cb7ed514624a6729a9c7f1f63bb_Out_2_Float, _Add_a0d54f1b8a844c4c835a883e8348f9c8_Out_2_Float, _Maximum_2ab7516ec96e459ca0c9a566ce94c15b_Out_2_Float, _Smoothstep_47f7c7791d064a39a30225fcd2fdf840_Out_3_Float);
-        float2 _Vector2_dcca42d8c0cb47918ec61b61bcd3c192_Out_0_Vector2 = float2(_Smoothstep_2153b3261b2344ec91f142dc996d740e_Out_3_Float, _Smoothstep_47f7c7791d064a39a30225fcd2fdf840_Out_3_Float);
-        Out_Vector4_1 = _Vector2_dcca42d8c0cb47918ec61b61bcd3c192_Out_0_Vector2;
         }
         
         void Unity_OneMinus_float4(float4 In, out float4 Out)
@@ -3908,17 +3529,18 @@ Shader "Shader Graphs/FogOfWar1"
             float2 _Property_6f97261e55464055a267dad7cc95ecd5_Out_0_Vector2 = _NoiseRange;
             float _Remap_a354b957cb514be2a96ca58a1649b1ef_Out_3_Float;
             Unity_Remap_float(_GradientNoise_0c7e44cebf9e417c81d768141fa91208_Out_2_Float, float2 (-1, 1), _Property_6f97261e55464055a267dad7cc95ecd5_Out_0_Vector2, _Remap_a354b957cb514be2a96ca58a1649b1ef_Out_3_Float);
-            float _Property_72d5138da5b0428b941ab7b32e2a4fa4_Out_0_Float = _RInnerSize;
-            float _Property_18102176587545449b3a231c026e55b7_Out_0_Float = _ROuterSize;
-            float _Property_69477c54a6164b6b8dcd5cefd3ec68cb_Out_0_Float = _ROutline;
-            Bindings_RectangleMask_e1162f732917c2244a46a1190ea7a822_float _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf;
-            _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf.uv0 = IN.uv0;
-            float2 _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf_OutVector4_1_Vector2;
-            SG_RectangleMask_e1162f732917c2244a46a1190ea7a822_float(_Property_72d5138da5b0428b941ab7b32e2a4fa4_Out_0_Float, _Property_18102176587545449b3a231c026e55b7_Out_0_Float, _Property_69477c54a6164b6b8dcd5cefd3ec68cb_Out_0_Float, _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf, _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf_OutVector4_1_Vector2);
-            float _Split_913073d8da024c81a564e8cbac528cb3_R_1_Float = _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf_OutVector4_1_Vector2[0];
-            float _Split_913073d8da024c81a564e8cbac528cb3_G_2_Float = _RectangleMask_2efdbb8969304af09a8b4be0b770b0cf_OutVector4_1_Vector2[1];
-            float _Split_913073d8da024c81a564e8cbac528cb3_B_3_Float = 0;
-            float _Split_913073d8da024c81a564e8cbac528cb3_A_4_Float = 0;
+            float _Split_538d90ebc5b74b4f96e51fd30b0aee49_R_1_Float = IN.AbsoluteWorldSpacePosition[0];
+            float _Split_538d90ebc5b74b4f96e51fd30b0aee49_G_2_Float = IN.AbsoluteWorldSpacePosition[1];
+            float _Split_538d90ebc5b74b4f96e51fd30b0aee49_B_3_Float = IN.AbsoluteWorldSpacePosition[2];
+            float _Split_538d90ebc5b74b4f96e51fd30b0aee49_A_4_Float = 0;
+            float2 _Vector2_418bf94619db4438a2a9c6e8a4055ab3_Out_0_Vector2 = float2(_Split_538d90ebc5b74b4f96e51fd30b0aee49_R_1_Float, _Split_538d90ebc5b74b4f96e51fd30b0aee49_B_3_Float);
+            float2 _Property_05d1f26d69014c848ad9355ba53f5987_Out_0_Vector2 = _P1;
+            float2 _Property_ebbca2b5b3e845b6926cc6f60d077774_Out_0_Vector2 = _P2;
+            float2 _Property_d1d20e45c3c04593808c78e1c3b5de4a_Out_0_Vector2 = _P3;
+            float2 _Property_9b57252c3d394199a5581ad0c7192d57_Out_0_Vector2 = _P4;
+            float _Property_b7eba52c8fed43acaa4cbafac035d43c_Out_0_Float = _SmoothDist;
+            float _GetInsideFactorCustomFunction_50302bf2fe0642c89db93523cb41c6e3_res_5_Float;
+            GetInsideFactor_float(_Vector2_418bf94619db4438a2a9c6e8a4055ab3_Out_0_Vector2, _Property_05d1f26d69014c848ad9355ba53f5987_Out_0_Vector2, _Property_ebbca2b5b3e845b6926cc6f60d077774_Out_0_Vector2, _Property_d1d20e45c3c04593808c78e1c3b5de4a_Out_0_Vector2, _Property_9b57252c3d394199a5581ad0c7192d57_Out_0_Vector2, _Property_b7eba52c8fed43acaa4cbafac035d43c_Out_0_Float, _GetInsideFactorCustomFunction_50302bf2fe0642c89db93523cb41c6e3_res_5_Float);
             UnityTexture2D _Property_c1c9af8e9aae47ab9d3205b9c791401b_Out_0_Texture2D = UnityBuildTexture2DStructNoScale(_RT_Particles);
               float4 _SampleTexture2DLOD_5c9f689ff1d74918b031cba63062a8ea_RGBA_0_Vector4 = SAMPLE_TEXTURE2D_LOD(_Property_c1c9af8e9aae47ab9d3205b9c791401b_Out_0_Texture2D.tex, _Property_c1c9af8e9aae47ab9d3205b9c791401b_Out_0_Texture2D.samplerstate, _Property_c1c9af8e9aae47ab9d3205b9c791401b_Out_0_Texture2D.GetTransformedUV(IN.uv0.xy), float(0));
             float _SampleTexture2DLOD_5c9f689ff1d74918b031cba63062a8ea_R_5_Float = _SampleTexture2DLOD_5c9f689ff1d74918b031cba63062a8ea_RGBA_0_Vector4.r;
@@ -3928,7 +3550,7 @@ Shader "Shader Graphs/FogOfWar1"
             float4 _OneMinus_33dafa6574d2459d8200dec61dbf7487_Out_1_Vector4;
             Unity_OneMinus_float4(_SampleTexture2DLOD_5c9f689ff1d74918b031cba63062a8ea_RGBA_0_Vector4, _OneMinus_33dafa6574d2459d8200dec61dbf7487_Out_1_Vector4);
             float4 _Multiply_590325aacfff435192271681bcdbfd09_Out_2_Vector4;
-            Unity_Multiply_float4_float4((_Split_913073d8da024c81a564e8cbac528cb3_R_1_Float.xxxx), _OneMinus_33dafa6574d2459d8200dec61dbf7487_Out_1_Vector4, _Multiply_590325aacfff435192271681bcdbfd09_Out_2_Vector4);
+            Unity_Multiply_float4_float4((_GetInsideFactorCustomFunction_50302bf2fe0642c89db93523cb41c6e3_res_5_Float.xxxx), _OneMinus_33dafa6574d2459d8200dec61dbf7487_Out_1_Vector4, _Multiply_590325aacfff435192271681bcdbfd09_Out_2_Vector4);
             float4 _Step_25aa498e99404ada84cfcd7440b8dbc2_Out_2_Vector4;
             Unity_Step_float4((_Remap_a354b957cb514be2a96ca58a1649b1ef_Out_3_Float.xxxx), _Multiply_590325aacfff435192271681bcdbfd09_Out_2_Vector4, _Step_25aa498e99404ada84cfcd7440b8dbc2_Out_2_Vector4);
             float _Split_2b19b259fdcd41098c7654eb0d05c9e0_R_1_Float = _Lerp_78072a5c55ee4ca0b7f8f3d76a772869_Out_3_Vector4[0];
@@ -3985,6 +3607,7 @@ Shader "Shader Graphs/FogOfWar1"
         
         
         
+            output.AbsoluteWorldSpacePosition = GetAbsolutePositionWS(input.positionWS);
         
             #if UNITY_UV_STARTS_AT_TOP
             #else

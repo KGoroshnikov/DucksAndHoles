@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc812880e92b387479f07b6ce6f1e40c, type: 3}
+  m_Name: Lvl4
+  m_EditorClassIdentifier: 
+  minPathLength: 20
+  maxMazeCellsX: 10
+  maxMazeCellsY: 4
+  wrongHoles: 2
+  customRooms:
+  - roomPrefab: {fileID: 1075437993258276972, guid: 52cf31bd92108f642b639fbf6d327c73,
+      type: 3}
+    pathFraction: 0.5
+    roomWidth: 2
+    roomHeight: 3
+    maxRoomPathTiles: 3
+  slimeAmount: 3
+  startCellType: 0
+  isLvlPath: 0

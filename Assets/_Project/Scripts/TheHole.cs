@@ -9,6 +9,7 @@ public class TheHole : MonoBehaviour
     [SerializeField] private float distSuck;
     private Transform gooseObj;
     private PlayerController playerController;
+    private GameManager gameManager;
     private MoveObjects moveObjects;
     [SerializeField] private state m_state;
     public enum state{
@@ -17,6 +18,7 @@ public class TheHole : MonoBehaviour
 
     void Start()
     {
+        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
         gooseObj = GameObject.FindWithTag("Player").transform;
         playerController = gooseObj.GetComponent<PlayerController>();
         moveObjects = GameObject.Find("MoveObjects").GetComponent<MoveObjects>();
@@ -44,6 +46,12 @@ public class TheHole : MonoBehaviour
         gooseObj.SetParent(parentObj);
         if (!animator.enabled) animator.enabled = true;
         else animator.SetTrigger("Jump");
+
+        Invoke("PassTheLvl", 3);
+    }
+
+    void PassTheLvl(){
+        gameManager.LvlPassed();
     }
 
     void OnDrawGizmosSelected()

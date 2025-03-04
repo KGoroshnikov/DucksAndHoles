@@ -9,8 +9,10 @@ public class LvlChooser : MonoBehaviour
 
     private bool active;
     private int chosenId;
+    private int progress;
 
     public void Init(Transform _goose){
+        progress = PlayerPrefs.GetInt("LvlsCompleted", 0);
         goose = _goose;
         active = true;
     }
@@ -28,9 +30,10 @@ public class LvlChooser : MonoBehaviour
         Ray ray = Camera.main.ScreenPointToRay(touchPos);
         if (Physics.Raycast(ray, out hit)) {
             if (hit.collider.TryGetComponent<LvlHole>(out LvlHole lvlHole)){
+                if (lvlHole.GetID() > progress) return;
+                chosenId = lvlHole.GetID();
                 moveObjects.AddObjToMove(goose, 0.2f, hit.transform.position, goose.rotation, LoadLvl);
                 active = false;
-                chosenId = lvlHole.GetID();
             }
         }
     }

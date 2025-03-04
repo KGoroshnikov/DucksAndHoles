@@ -47,6 +47,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private TrailRenderer trail;
     [SerializeField] private Rigidbody rb;
     [SerializeField] private GameObject mainFogTrail;
+    [SerializeField] private TrailRenderer fogTrail;
     private float _y;
 
     void Start()
@@ -66,12 +67,12 @@ public class PlayerController : MonoBehaviour
 
     void OnEnable(){
         phoneInputData = GameObject.Find("PhoneData").GetComponent<PhoneInputData>();
-        phoneInputData.OnStartTouch += StartMoving;
-        phoneInputData.OnEndTouch += StopMoving;
+        /*phoneInputData.OnStartTouch += StartMoving;
+        phoneInputData.OnEndTouch += StopMoving;*/
     }
      void OnDisable(){
-        phoneInputData.OnStartTouch -= StartMoving;
-        phoneInputData.OnEndTouch -= StopMoving;
+        /*phoneInputData.OnStartTouch -= StartMoving;
+        phoneInputData.OnEndTouch -= StopMoving;*/
     }
     public void StartMoving(Vector2 touchPos)
     {
@@ -86,6 +87,19 @@ public class PlayerController : MonoBehaviour
     Quaternion GyroToUnity(Quaternion quat)
     {
         return new Quaternion(quat.x, quat.z, quat.y, -quat.w);
+    }
+
+    public void ResetPlayer(){
+        m_state = State.afk;
+        mainFogTrail.transform.SetParent(transform);
+        mainFogTrail.transform.localPosition = Vector3.zero;
+        mainFogTrail.transform.localRotation = Quaternion.Euler(new Vector3(90, 0, 0));
+        puffCollisionVFX.transform.SetParent(transform);
+        puffCollisionVFX.transform.localPosition = Vector3.zero;
+        rb.isKinematic = false;
+        trail.emitting = false;
+        trail.Clear();
+        fogTrail.Clear();
     }
 
     public void StopMoving(Vector2 touchPos)
@@ -201,12 +215,24 @@ public class PlayerController : MonoBehaviour
         animator.SetTrigger("IdleMode");
         currentForce = Vector3.zero;
         dashForce = Vector3.zero;
-        rotAngleAnim = 90;
+        rotAngleAnim = -90;
         duckMesh.transform.localEulerAngles = new Vector3(rotAngleAnim, 0, 90);
+    }
+    
+    public void Die(){
+        DisableGoose();
+        puffCollisionVFX.Play();
+        puffCollisionVFX.transform.SetParent(null);
+        gameObject.SetActive(false);
+    }
+
+    public Vector3 GetInputDir(){
+        return worldMovement;
     }
 
     void OnGUI()
     {
+        return;
         GUIStyle guiStyle = new GUIStyle();
         guiStyle.normal.textColor = Color.red;
         guiStyle.fontSize = 40;

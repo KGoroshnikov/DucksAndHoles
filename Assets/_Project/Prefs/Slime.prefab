@@ -73,6 +73,8 @@ GameObject:
   m_Component:
   - component: {fileID: 6821710743084503807}
   - component: {fileID: 8031861806892029794}
+  - component: {fileID: 4568277528478060314}
+  - component: {fileID: 699955086442863561}
   m_Layer: 0
   m_Name: Slime
   m_TagString: Untagged
@@ -109,7 +111,7 @@ Animator:
   m_Avatar: {fileID: 0}
   m_Controller: {fileID: 9100000, guid: 8c32b4d2a01b1a84b8e9385153003141, type: 2}
   m_CullingMode: 0
-  m_UpdateMode: 0
+  m_UpdateMode: 1
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
@@ -119,6 +121,67 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &4568277528478060314
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4291603009846682565}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 49b869797b45d4648997e3c4fbf90972, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveTime: {x: 0.9, y: 1.1}
+  chillTime: {x: 1, y: 3}
+  animator: {fileID: 8031861806892029794}
+  randOffset: 0.03
+  hitRange: 0.05
+  angerRange: 0.12
+  m_state: 0
+--- !u!114 &699955086442863561
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4291603009846682565}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0d74748b6101d5245ac41f7f737f780b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  event1:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 4568277528478060314}
+        m_TargetAssemblyTypeName: Slime, Assembly-CSharp
+        m_MethodName: CanHit
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  event2:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 4568277528478060314}
+        m_TargetAssemblyTypeName: Slime, Assembly-CSharp
+        m_MethodName: CantHit
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &4527305726074406621
 GameObject:
   m_ObjectHideFlags: 0
