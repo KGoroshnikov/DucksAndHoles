@@ -10,13 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bc812880e92b387479f07b6ce6f1e40c, type: 3}
-  m_Name: Lvl2
+  m_Name: Lvl8
   m_EditorClassIdentifier: 
-  minPathLength: 10
-  maxMazeCellsX: 5
-  maxMazeCellsY: 5
-  wrongHoles: 0
+  minPathLength: 12
+  maxMazeCellsX: 7
+  maxMazeCellsY: 7
+  wrongHoles: 2
+  bubblesAmount: 15
   customRooms: []
-  slimeAmount: 0
+  slimeAmount: 3
   startCellType: 0
   isLvlPath: 0

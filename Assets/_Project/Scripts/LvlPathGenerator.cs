@@ -7,11 +7,13 @@ using UnityEngine.XR.ARFoundation;
 public class LvlPathGenerator : Room
 {
     private Transform goose;
-
+    
     [SerializeField] private int amountLvls;
+    [SerializeField] private int lvlsPerRow = 5;
     [SerializeField] private GameObject holePref;
     [SerializeField] private Vector2 randDist;
     [SerializeField] private Vector2 randY;
+    [SerializeField] private float rowInterval;
 
     [SerializeField] private LineRenderer lineRenderer;
 
@@ -54,29 +56,43 @@ public class LvlPathGenerator : Room
 
         //moveObjects.AddObjToMove(goose, 0.2f, startPoint, goose.rotation);
 
-        Vector3 mainDir = (endPoint - startPoint).normalized;
+        Vector3 mainDir = (new Vector3(endPoint.x, endPoint.y, startPoint.z) - startPoint).normalized;
         Vector3 rightDir = Vector3.Cross(mainDir, Vector3.up);
 
-        for(int i = 0; i < amountLvls; i++){
-            float rx = Random.Range(randDist.x, randDist.y);
-            Vector3 pos = startPoint + mainDir * i * rx;
-            //Debug.Log("pos: " + pos + " mainDir: " + mainDir + " i: " + i + " rx: " + rx);
-            if (i != 0) pos += rightDir * Random.Range(randY.x, randY.y);
-            pos.y = _goose.position.y + Funcs.yOffset;
-            holePoses.Add(pos);
-            pos.y += Funcs.yOffset / 2;
+        int rowCount = Mathf.CeilToInt((float)amountLvls / lvlsPerRow);
+        int levelIndex = 0;
+        Vector3 currentStart = startPoint;
 
-            GameObject newHole = Instantiate(holePref, pos, Quaternion.Euler(90, 0, 0));
-            newHole.transform.SetParent(transform);
+        for (int row = 0; row < rowCount; row++) {
+            Vector3 rowDir = (row % 2 == 0) ? mainDir : -mainDir;
+    
+            Vector3 currentPos = currentStart;
+            for (int col = 0; col < lvlsPerRow && levelIndex < amountLvls; col++) {
+                if (col > 0) {
+                    float distanceStep = Random.Range(randDist.x, randDist.y);
+                    currentPos += rowDir * distanceStep;
+                }
+                Vector3 pos = currentPos;
+                pos.y = goose.position.y + Funcs.yOffset;
+                pos += rightDir * Random.Range(randY.x, randY.y);
+                holePoses.Add(pos);
+                pos.y += Funcs.yOffset / 2;
 
-            HoleLvl holeLvl = new HoleLvl();
-            holeLvl.obj = newHole;
-            holeLvl.lvlHole = newHole.GetComponent<LvlHole>();
-            holeLvl.lvlHole.SetID(i);
-            holeLvl.lockObj = newHole.transform.Find("LockedObj").gameObject;
-            holeLvl.renderer = newHole.GetComponent<Renderer>();
-            holeLvl.tMP_Text = newHole.transform.Find("Text").GetComponent<TMP_Text>();
-            spawnedHoles.Add(holeLvl);
+                GameObject newHole = Instantiate(holePref, pos, Quaternion.Euler(90, 0, 0));
+                newHole.transform.SetParent(transform);
+    
+                HoleLvl holeLvl = new HoleLvl();
+                holeLvl.obj = newHole;
+                holeLvl.lvlHole = newHole.GetComponent<LvlHole>();
+                holeLvl.lvlHole.SetID(levelIndex);
+                holeLvl.lockObj = newHole.transform.Find("LockedObj").gameObject;
+                holeLvl.renderer = newHole.GetComponent<Renderer>();
+                holeLvl.tMP_Text = newHole.transform.Find("Text").GetComponent<TMP_Text>();
+                spawnedHoles.Add(holeLvl);
+    
+                levelIndex++;
+            }
+            currentStart = currentPos - rightDir * rowInterval;
         }
         lineRenderer.positionCount = holePoses.Count;
         lineRenderer.SetPositions(holePoses.ToArray());

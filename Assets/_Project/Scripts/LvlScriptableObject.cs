@@ -8,6 +8,7 @@ public class LvlScriptableObject : ScriptableObject
     public int maxMazeCellsX = 10;
     public int maxMazeCellsY = 10;
     public int wrongHoles = 0;
+    public int bubblesAmount = 0;
     public List<MazeGenerator.RoomInfo> customRooms = new List<MazeGenerator.RoomInfo>();
 
     public int slimeAmount;

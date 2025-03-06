@@ -17,6 +17,7 @@ public class MazeGenerator : MonoBehaviour
     [SerializeField] private int maxMazeCellsY = 10;
     [SerializeField] private int slimeAmount;
     [SerializeField] private int wrongHoles;
+    [SerializeField] private int bubblesAmount;
 
     [Header("Special Settings")]
     [SerializeField] private float groundTextureOffset;
@@ -67,6 +68,7 @@ public class MazeGenerator : MonoBehaviour
     [SerializeField] private GameObject hole;
     [SerializeField] private GameObject slime;
     [SerializeField] private GameObject wrongHolePref;
+    [SerializeField] private GameObject bubblePref;
 
     public struct RoomDoorInfo {
         public Vector2Int insideCell;
@@ -197,6 +199,7 @@ public class MazeGenerator : MonoBehaviour
         SpawnHoles();
         SpawnWrongHoles();
         SpawnSlimes(slimeAmount);
+        SpawnBubbles(bubblesAmount);
 
         InitGroundTex();
 
@@ -240,6 +243,7 @@ public class MazeGenerator : MonoBehaviour
         customRooms = lvlData.customRooms;
 
         wrongHoles = lvl.wrongHoles;
+        bubblesAmount = lvl.bubblesAmount;
     }
 
     public void DestroyLevel(){
@@ -331,7 +335,7 @@ public class MazeGenerator : MonoBehaviour
     }
 
     void SpawnWrongHoles(){
-        List<Vector3> possiblePositions = new List<Vector3>();
+        List<Vector2Int> possiblePositions = new List<Vector2Int>();
         for(int i = 0; i < gridWidth; i++){
             for(int j = 0; j < gridHeight; j++){
                 if (grid[i, j].isRoom || !grid[i, j].canSpawnHere) continue;
@@ -343,16 +347,37 @@ public class MazeGenerator : MonoBehaviour
                 if (grid[i, j].wallRight) amountWalls++;
                 
                 if (amountWalls == 3){
-                    possiblePositions.Add(GridToWorldPosition(new Vector2Int(i, j)));
+                    possiblePositions.Add(new Vector2Int(i, j));
                 }
             }
         }
         int spawnAmountWrongHoles = Mathf.Min(wrongHoles, possiblePositions.Count);
         for(int i = 0; i < spawnAmountWrongHoles; i++){
             int spawnPos = Random.Range(0, possiblePositions.Count);
-            GameObject newHole = Instantiate(wrongHolePref, possiblePositions[spawnPos] + new Vector3(0, Funcs.yOffset, 0), Quaternion.Euler(90, 0, 0));
+            grid[possiblePositions[spawnPos].x, possiblePositions[spawnPos].y].canSpawnHere = false;
+            GameObject newHole = Instantiate(wrongHolePref, GridToWorldPosition(possiblePositions[spawnPos]) + new Vector3(0, Funcs.yOffset, 0), Quaternion.Euler(90, 0, 0));
             spawnedObjects.Add(newHole);
             possiblePositions.RemoveAt(spawnPos);
+        }
+    }
+
+    void SpawnBubbles(int amount){
+        if (amount == 0) return;
+        List<Vector2Int> possibleTiles = new List<Vector2Int>();
+        for(int x = 0; x < gridWidth; x++){
+            for(int y = 0; y < gridHeight; y++)
+            {
+                if (new Vector2Int(x, y) == startCell || new Vector2Int(x, y) == finishCell || !grid[x, y].canSpawnHere) continue;
+                possibleTiles.Add(new Vector2Int(x, y));
+            }
+        }
+        amount = Mathf.Min(amount, possibleTiles.Count);
+        for(int i = 0; i < amount; i++){
+            Vector2Int cell = possibleTiles[Random.Range(0, possibleTiles.Count)];
+            grid[cell.x, cell.y].canSpawnHere = false;
+            possibleTiles.Remove(cell);
+            GameObject bubble = Instantiate(bubblePref, GridToWorldPosition(cell), Quaternion.identity);
+            spawnedObjects.Add(bubble);
         }
     }
 

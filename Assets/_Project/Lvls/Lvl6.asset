@@ -10,13 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bc812880e92b387479f07b6ce6f1e40c, type: 3}
-  m_Name: Lvl2
+  m_Name: Lvl6
   m_EditorClassIdentifier: 
   minPathLength: 10
-  maxMazeCellsX: 5
-  maxMazeCellsY: 5
-  wrongHoles: 0
-  customRooms: []
+  maxMazeCellsX: 4
+  maxMazeCellsY: 7
+  wrongHoles: 1
+  customRooms:
+  - roomPrefab: {fileID: 3111573311968106861, guid: 908940aa1be3b4e4da11cc8e26a959c3,
+      type: 3}
+    customWals: 0
+    pathFraction: 0.7
+    roomWidth: 1
+    roomHeight: 1
+    maxRoomPathTiles: 1
   slimeAmount: 0
   startCellType: 0
   isLvlPath: 0

@@ -46,11 +46,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   walls: []
-  amountLvls: 5
+  amountLvls: 10
+  lvlsPerRow: 5
   holePref: {fileID: 6819463870076796671, guid: 3170d1777193cd14f8f600715f6b4817,
     type: 3}
   randDist: {x: 0.19, y: 0.21}
-  randY: {x: -0.15, y: 0.15}
+  randY: {x: -0.05, y: 0.05}
+  rowInterval: -0.2
   lineRenderer: {fileID: 1492401442187600839}
   yellowHoleMat: {fileID: 2100000, guid: c5f33e781db733a41bfb47406871b6c1, type: 2}
   yellowColor: {r: 1, g: 0.99215686, b: 0.5529412, a: 1}

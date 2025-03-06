@@ -6,6 +6,8 @@ TagManager:
   tags:
   - Wall
   - Breakable
+  - Movable
+  - ITappable
   layers:
   - Default
   - TransparentFX

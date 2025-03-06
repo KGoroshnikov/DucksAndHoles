@@ -9,6 +9,7 @@ public class TouchManager : MonoBehaviour
     [SerializeField] private LayerMask lmDefault;
     private PhoneInputData phoneInputData;
     private bool movingItem;
+    private bool justTapped;
     private Vector3 targetPos;
     private Rigidbody rbMoving;
     private MovableObject movableObject;
@@ -57,15 +58,26 @@ public class TouchManager : MonoBehaviour
             if (movableObject.GetState() == MovableObject.state.noUse) movingItem = false;
         }
 
-        if (!movingItem){
+        justTapped = false;
+        if (Physics.Raycast(ray, out hit, 1000, lmDefault)) {
+            if (hit.collider.CompareTag("ITappable")){
+                hit.collider.GetComponent<ITappable>().Tapped();
+                justTapped = true;
+            }
+        }
+
+        Debug.Log("start: " + movingItem + " " + justTapped);
+        if (!movingItem && !justTapped){
             playerController.StartMoving(touchPos);
         }
     }
     void EndTouch(Vector2 touchPos){
-        if (!movingItem){
+        Debug.Log("end: " + movingItem + " " + justTapped);
+        if (!movingItem && !justTapped){
             playerController.StopMoving(touchPos);
         }
 
+        justTapped = false;
         movingItem = false;
     }
 }

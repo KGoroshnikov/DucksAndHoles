@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc812880e92b387479f07b6ce6f1e40c, type: 3}
   m_Name: _LvlPath
   m_EditorClassIdentifier: 
-  minPathLength: 9
+  minPathLength: 10
   maxMazeCellsX: 10
-  maxMazeCellsY: 1
+  maxMazeCellsY: 3
   wrongHoles: 0
   customRooms:
   - roomPrefab: {fileID: 6681829858755414095, guid: 70ec2c877fb56d84e8d5ec12e9c9ff29,
@@ -22,8 +22,8 @@ MonoBehaviour:
     customWals: 1
     pathFraction: 0.5
     roomWidth: 10
-    roomHeight: 1
-    maxRoomPathTiles: 20
+    roomHeight: 3
+    maxRoomPathTiles: 100
   slimeAmount: 0
   startCellType: 1
   isLvlPath: 1
