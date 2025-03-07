@@ -14,7 +14,8 @@ Material:
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
   - _SURFACE_TYPE_TRANSPARENT
-  m_InvalidKeywords: []
+  m_InvalidKeywords:
+  - _GAMESTAGE
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -57,11 +58,19 @@ Material:
     - _CastShadows: 0
     - _Cull: 2
     - _DstBlend: 10
+    - _Float: 392.55
+    - _GAMESTAGE: 1
+    - _GameStage: 0
     - _GooseTiles: 10
     - _LineWidth: 0.003
     - _MaskRadius: 0
+    - _NoiseScale: 26
+    - _NoiseScale2: 32.51
     - _QueueControl: 1
     - _QueueOffset: -50
+    - _ROurlineWidth: 0.92
+    - _SmoothDist: 4.5
+    - _Speed: 1
     - _SrcBlend: 5
     - _Surface: 1
     - _TexTiling: 2
@@ -69,8 +78,13 @@ Material:
     - _ZWrite: 1
     - _ZWriteControl: 1
     m_Colors:
-    - _GoosePos: {r: 0, g: 0, b: 0, a: 0}
+    - _GoosePos: {r: -0.58956814, g: 0.58702993, b: -0.8005247, a: 0}
     - _MainColor: {r: 1, g: 1, b: 1, a: 0.12156863}
+    - _NoiseRange: {r: -0.5, g: 0.6, b: 0, a: 0}
+    - _P1: {r: 0, g: 0, b: 0, a: 0}
+    - _P2: {r: 0, g: 0, b: 0, a: 0}
+    - _P3: {r: 0, g: 0, b: 0, a: 0}
+    - _P4: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!114 &5385944521425539911

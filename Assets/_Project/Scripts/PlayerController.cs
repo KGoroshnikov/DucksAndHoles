@@ -47,6 +47,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private TrailRenderer trail;
     [SerializeField] private Rigidbody rb;
     [SerializeField] private GameObject mainFogTrail;
+    [SerializeField] private TrailRenderer fogTrail;
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip[] puffHitClips;
     private float _y;
 
     void Start()
@@ -66,16 +69,12 @@ public class PlayerController : MonoBehaviour
 
     void OnEnable(){
         phoneInputData = GameObject.Find("PhoneData").GetComponent<PhoneInputData>();
-        phoneInputData.OnStartTouch += StartMoving;
-        phoneInputData.OnEndTouch += StopMoving;
     }
-     void OnDisable(){
-        phoneInputData.OnStartTouch -= StartMoving;
-        phoneInputData.OnEndTouch -= StopMoving;
-    }
+
     public void StartMoving(Vector2 touchPos)
     {
         if (m_state != State.idle) return;
+        PlaySFX(puffHitClips[0]);
         puffVFX.Play();
         dirtParticles.Play();
         m_state = State.running;
@@ -86,6 +85,19 @@ public class PlayerController : MonoBehaviour
     Quaternion GyroToUnity(Quaternion quat)
     {
         return new Quaternion(quat.x, quat.z, quat.y, -quat.w);
+    }
+
+    public void ResetPlayer(){
+        m_state = State.afk;
+        mainFogTrail.transform.SetParent(transform);
+        mainFogTrail.transform.localPosition = Vector3.zero;
+        mainFogTrail.transform.localRotation = Quaternion.Euler(new Vector3(90, 0, 0));
+        puffCollisionVFX.transform.SetParent(transform);
+        puffCollisionVFX.transform.localPosition = Vector3.zero;
+        rb.isKinematic = false;
+        trail.emitting = false;
+        trail.Clear();
+        fogTrail.Clear();
     }
 
     public void StopMoving(Vector2 touchPos)
@@ -99,44 +111,12 @@ public class PlayerController : MonoBehaviour
         duckMesh.transform.localEulerAngles = new Vector3(rotAngleAnim, 0, 90);
     }
 
-    void ResetDash(){
-        isDashAvaliable = true;
-    }
-
-    void ProcessDash(){
-        if (!isDashAvaliable) return;
-
-        Vector3 currentAccel = phoneInputData.GetUserAcceleration();
-        lowPassValue = Vector3.Lerp(lowPassValue, currentAccel, smoothingFactor);
-        Vector3 deltaAccel = currentAccel - lowPassValue;
-        if (deltaAccel.magnitude > jerkThreshold)
-        {
-            deviceAccelerationRaw = currentAccel;
-            deviceJerk = deltaAccel.normalized;
-            deviceJerk = new Vector3(deviceJerk.x, deviceJerk.y, deviceJerk.z);
-            
-            Vector3 worldJerk = Camera.main.transform.TransformDirection(deviceJerk).normalized;
-            isDashAvaliable = false;
-            jerkVector = new Vector3(-worldJerk.x, 0, -worldJerk.y);
-            dashForce += jerkVector * dashSpeed;
-            Invoke("ResetDash", jerkCooldown);
-        }
-        
-    }
-
     void FixedUpdate()
     {
         if (m_state == State.afk) return;
 
-        ProcessDash();
-
-        //transform.Translate(currentForce, Space.World);
         rb.linearVelocity = currentForce;
-
-        if (dashForce.magnitude > 0.01f ) dashForce *= dashDamp;
-        else dashForce = Vector3.zero; 
         
-
         if (m_state != State.running){
             currentForce *= forceDamp;
             if (currentForce.magnitude <= 0.0001f) currentForce = Vector3.zero; 
@@ -163,10 +143,9 @@ public class PlayerController : MonoBehaviour
         Vector3 camRight = Vector3.Cross(Vector3.up, camForward);
 
         worldMovement = (input2D.y * camForward) + (input2D.x * camRight);
-        //worldMovement = worldMovement.normalized;
 
         Vector3 finalSpeed = worldMovement * speedMul * Time.deltaTime;
-        //currentForce += finalSpeed;
+
         float dot = Vector3.Dot(currentForce.normalized, worldMovement.normalized);
         currentForce += Mathf.Lerp(brakeForce, accelerationForce, dot) * finalSpeed;
         
@@ -201,12 +180,34 @@ public class PlayerController : MonoBehaviour
         animator.SetTrigger("IdleMode");
         currentForce = Vector3.zero;
         dashForce = Vector3.zero;
-        rotAngleAnim = 90;
+        rotAngleAnim = -90;
         duckMesh.transform.localEulerAngles = new Vector3(rotAngleAnim, 0, 90);
+    }
+
+    public void GetHitted(){
+        PlaySFX(puffHitClips[1]);
+    }
+
+    void PlaySFX(AudioClip clip){
+        audioSource.clip = clip;
+        audioSource.pitch = Random.Range(0.8f, 1.2f);
+        audioSource.Play();
+    }
+    
+    public void Die(){
+        DisableGoose();
+        puffCollisionVFX.Play();
+        puffCollisionVFX.transform.SetParent(null);
+        gameObject.SetActive(false);
+    }
+
+    public Vector3 GetInputDir(){
+        return worldMovement;
     }
 
     void OnGUI()
     {
+        return;
         GUIStyle guiStyle = new GUIStyle();
         guiStyle.normal.textColor = Color.red;
         guiStyle.fontSize = 40;

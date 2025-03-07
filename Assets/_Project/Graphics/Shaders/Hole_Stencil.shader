@@ -502,7 +502,7 @@ Shader "Shader Graphs/Hole1"
             float4 _Multiply_d6c986387e05438f843f88bf6e83757f_Out_2_Vector4;
             Unity_Multiply_float4_float4((_Subtract_3eabfb95235c4faab69f751d90721f3f_Out_2_Float.xxxx), _Property_c61bfd18c72d4543baba4ccd91b55da5_Out_0_Vector4, _Multiply_d6c986387e05438f843f88bf6e83757f_Out_2_Vector4);
             float4 _Blend_f53c066e552b4bed9417ea683b7f0892_Out_2_Vector4;
-            Unity_Blend_Overwrite_float4(_Multiply_81fa9a4003b44a9e958eaf148fb4f8d3_Out_2_Vector4, _Multiply_d6c986387e05438f843f88bf6e83757f_Out_2_Vector4, _Blend_f53c066e552b4bed9417ea683b7f0892_Out_2_Vector4, (_Multiply_d6c986387e05438f843f88bf6e83757f_Out_2_Vector4).x);
+            Unity_Blend_Overwrite_float4(_Multiply_81fa9a4003b44a9e958eaf148fb4f8d3_Out_2_Vector4, _Multiply_d6c986387e05438f843f88bf6e83757f_Out_2_Vector4, _Blend_f53c066e552b4bed9417ea683b7f0892_Out_2_Vector4, _Subtract_3eabfb95235c4faab69f751d90721f3f_Out_2_Float);
             float _OneMinus_bb523d395ba44a1392fbfb3adad26915_Out_1_Float;
             Unity_OneMinus_float(_Step_ef27f8bc8e5a4744921a3b9887baab63_Out_2_Float, _OneMinus_bb523d395ba44a1392fbfb3adad26915_Out_1_Float);
             surface.BaseColor = (_Blend_f53c066e552b4bed9417ea683b7f0892_Out_2_Vector4.xyz);
@@ -2953,7 +2953,7 @@ Shader "Shader Graphs/Hole1"
             float4 _Multiply_d6c986387e05438f843f88bf6e83757f_Out_2_Vector4;
             Unity_Multiply_float4_float4((_Subtract_3eabfb95235c4faab69f751d90721f3f_Out_2_Float.xxxx), _Property_c61bfd18c72d4543baba4ccd91b55da5_Out_0_Vector4, _Multiply_d6c986387e05438f843f88bf6e83757f_Out_2_Vector4);
             float4 _Blend_f53c066e552b4bed9417ea683b7f0892_Out_2_Vector4;
-            Unity_Blend_Overwrite_float4(_Multiply_81fa9a4003b44a9e958eaf148fb4f8d3_Out_2_Vector4, _Multiply_d6c986387e05438f843f88bf6e83757f_Out_2_Vector4, _Blend_f53c066e552b4bed9417ea683b7f0892_Out_2_Vector4, (_Multiply_d6c986387e05438f843f88bf6e83757f_Out_2_Vector4).x);
+            Unity_Blend_Overwrite_float4(_Multiply_81fa9a4003b44a9e958eaf148fb4f8d3_Out_2_Vector4, _Multiply_d6c986387e05438f843f88bf6e83757f_Out_2_Vector4, _Blend_f53c066e552b4bed9417ea683b7f0892_Out_2_Vector4, _Subtract_3eabfb95235c4faab69f751d90721f3f_Out_2_Float);
             float _OneMinus_bb523d395ba44a1392fbfb3adad26915_Out_1_Float;
             Unity_OneMinus_float(_Step_ef27f8bc8e5a4744921a3b9887baab63_Out_2_Float, _OneMinus_bb523d395ba44a1392fbfb3adad26915_Out_1_Float);
             surface.BaseColor = (_Blend_f53c066e552b4bed9417ea683b7f0892_Out_2_Vector4.xyz);
@@ -3936,7 +3936,7 @@ Shader "Shader Graphs/Hole1"
             float4 _Multiply_d6c986387e05438f843f88bf6e83757f_Out_2_Vector4;
             Unity_Multiply_float4_float4((_Subtract_3eabfb95235c4faab69f751d90721f3f_Out_2_Float.xxxx), _Property_c61bfd18c72d4543baba4ccd91b55da5_Out_0_Vector4, _Multiply_d6c986387e05438f843f88bf6e83757f_Out_2_Vector4);
             float4 _Blend_f53c066e552b4bed9417ea683b7f0892_Out_2_Vector4;
-            Unity_Blend_Overwrite_float4(_Multiply_81fa9a4003b44a9e958eaf148fb4f8d3_Out_2_Vector4, _Multiply_d6c986387e05438f843f88bf6e83757f_Out_2_Vector4, _Blend_f53c066e552b4bed9417ea683b7f0892_Out_2_Vector4, (_Multiply_d6c986387e05438f843f88bf6e83757f_Out_2_Vector4).x);
+            Unity_Blend_Overwrite_float4(_Multiply_81fa9a4003b44a9e958eaf148fb4f8d3_Out_2_Vector4, _Multiply_d6c986387e05438f843f88bf6e83757f_Out_2_Vector4, _Blend_f53c066e552b4bed9417ea683b7f0892_Out_2_Vector4, _Subtract_3eabfb95235c4faab69f751d90721f3f_Out_2_Float);
             float _OneMinus_bb523d395ba44a1392fbfb3adad26915_Out_1_Float;
             Unity_OneMinus_float(_Step_ef27f8bc8e5a4744921a3b9887baab63_Out_2_Float, _OneMinus_bb523d395ba44a1392fbfb3adad26915_Out_1_Float);
             surface.BaseColor = (_Blend_f53c066e552b4bed9417ea683b7f0892_Out_2_Vector4.xyz);

@@ -74,6 +74,7 @@ Material:
     - _RInnerSize: 0.2
     - _ROuterSize: 0.4
     - _ROutline: 0.1
+    - _SmoothDist: 0.11
     - _Speed: 0.1
     - _SrcBlend: 5
     - _Surface: 1
@@ -86,5 +87,9 @@ Material:
     - _Color2: {r: 0.1320754, g: 0.1320754, b: 0.1320754, a: 0.87058824}
     - _NoiseRange: {r: -0.5, g: 0.6, b: 0, a: 0}
     - _NoiseRange_1: {r: -0.5, g: 0.5, b: 0, a: 0}
+    - _P1: {r: -1.113303, g: -1.18758, b: 0, a: 0}
+    - _P2: {r: 0.1866968, g: -1.18758, b: 0, a: 0}
+    - _P3: {r: 0.1866968, g: -0.4875795, b: 0, a: 0}
+    - _P4: {r: -1.113303, g: -0.4875795, b: 0, a: 0}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

@@ -6,6 +6,9 @@ TagManager:
   tags:
   - Wall
   - Breakable
+  - Movable
+  - ITappable
+  - DynamicSound
   layers:
   - Default
   - TransparentFX
@@ -13,7 +16,7 @@ TagManager:
   - FogParticles
   - Water
   - UI
-  - 
+  - Movable
   - 
   - 
   - 

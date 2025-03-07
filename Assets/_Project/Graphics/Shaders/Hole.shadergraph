@@ -331,6 +331,20 @@
         {
             "m_OutputSlot": {
                 "m_Node": {
+                    "m_Id": "3eabfb95235c4faab69f751d90721f3f"
+                },
+                "m_SlotId": 2
+            },
+            "m_InputSlot": {
+                "m_Node": {
+                    "m_Id": "f53c066e552b4bed9417ea683b7f0892"
+                },
+                "m_SlotId": 3
+            }
+        },
+        {
+            "m_OutputSlot": {
+                "m_Node": {
                     "m_Id": "48e1382531a24aaa9caac5449ada8173"
                 },
                 "m_SlotId": 0
@@ -653,20 +667,6 @@
         {
             "m_OutputSlot": {
                 "m_Node": {
-                    "m_Id": "d6c986387e05438f843f88bf6e83757f"
-                },
-                "m_SlotId": 2
-            },
-            "m_InputSlot": {
-                "m_Node": {
-                    "m_Id": "f53c066e552b4bed9417ea683b7f0892"
-                },
-                "m_SlotId": 3
-            }
-        },
-        {
-            "m_OutputSlot": {
-                "m_Node": {
                     "m_Id": "db19fdd654524f0e98298aea649521d0"
                 },
                 "m_SlotId": 1
@@ -905,7 +905,7 @@
     "m_Title": "Mask",
     "m_Position": {
         "x": -4126.0,
-        "y": 169.0
+        "y": 169.0000762939453
     }
 }
 
@@ -4160,7 +4160,7 @@
         "m_Position": {
             "serializedVersion": "2",
             "x": -1323.0001220703125,
-            "y": 869.0000610351563,
+            "y": 865.0000610351563,
             "width": 142.0,
             "height": 34.00006103515625
         }
@@ -4465,9 +4465,9 @@
         "m_Expanded": true,
         "m_Position": {
             "serializedVersion": "2",
-            "x": -1136.0,
-            "y": 772.0000610351563,
-            "width": 207.99993896484376,
+            "x": -1146.0,
+            "y": 797.0000610351563,
+            "width": 208.0,
             "height": 302.00006103515627
         }
     },

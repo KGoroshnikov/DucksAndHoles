@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.VFX;
 
@@ -7,7 +9,8 @@ public class FogOfWarManager : MonoBehaviour
     //[SerializeField] private VisualEffect particles; not working on mobile :(
     [SerializeField] private GameObject mainFog;
     [SerializeField] private Camera particlesCam;
-    [SerializeField] private float density;
+    [SerializeField] private Material fogMat;
+    //[SerializeField] private float density;
 
     private float scaleParticlePlane = 0.045f; // 0.25 / 6
     private float scaleFogPlane = 0.0166f; // 0.1 / 6
@@ -15,20 +18,33 @@ public class FogOfWarManager : MonoBehaviour
 
     private bool working;
 
-    public void SetupFog(Transform _goose, Vector3 center, Vector2 size){
+    public void HideFog(){
+        mainFog.SetActive(false);
+    }
+
+    void OnDisable()
+    {
+        for(int i = 0; i < 4; i++){
+            fogMat.SetVector("_P" + (i + 1), Vector2.zero);
+        }
+    }
+
+    public void SetupFog(Transform _goose, Vector3 center, Vector2 size, List<Vector2> points){
+        mainFog.SetActive(true);
         goose = _goose;
         
-        //particles.transform.position = center;
         mainFog.transform.position = center;
 
-        Vector2 sizeParticle = new Vector2(size.x * scaleParticlePlane, size.y * scaleParticlePlane);
-        //particles.SetVector2("PlaneSize", sizeParticle);
-        //particles.SetInt("SpawnAmount", (int)(density * ((sizeParticle.x + sizeParticle.y)/2)));
-
-        mainFog.transform.localScale = new Vector3(scaleFogPlane * size.x, 1, scaleFogPlane * size.y);
+        //mainFog.transform.localScale = new Vector3(scaleFogPlane * size.x, 1, scaleFogPlane * size.y);
+        mainFog.transform.localScale = Vector3.one * MathF.Max(size.x, size.y) * scaleFogPlane;
         particlesCam.transform.position = new Vector3(particlesCam.transform.position.x, center.y + 1f, particlesCam.transform.position.z);
 
         particlesCam.orthographicSize = sizeCamParticles * Mathf.Max(size.x, size.y);
+
+        List<Vector2> sortedPoints = Funcs.SortPointsCounterClockwiseXZ(points);
+        for(int i = 0; i < 4; i++){
+            fogMat.SetVector("_P" + (i + 1), sortedPoints[i]);
+        }
 
         working = true;
         //particles.Play();
