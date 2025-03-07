@@ -24,8 +24,12 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Color redColor;
     [SerializeField] private Color greenColor;
     [SerializeField] private HealthManager healthManager;
+    [SerializeField] private AudioController audioController;
 
     private Vector3 playerStartLvlPos;
+
+    [SerializeField] private AudioSource audioGameWin;
+    [SerializeField] private AudioClip[] winLooseClips;
 
     private int currentLvl;
 
@@ -51,6 +55,8 @@ public class GameManager : MonoBehaviour
         if (currentLvl > PlayerPrefs.GetInt("LvlsCompleted", 0))
             PlayerPrefs.SetInt("LvlsCompleted", currentLvl);
         Restart();
+        audioGameWin.clip = winLooseClips[0];
+        audioGameWin.Play();
     }
     void Restart(){
         chooseGameArea.GetGoose().SetActive(true);
@@ -65,6 +71,8 @@ public class GameManager : MonoBehaviour
         healthManager.Init(chooseGameArea.GetGoose().GetComponent<PlayerController>());
     }
     public void LvlFailed(){
+        audioGameWin.clip = winLooseClips[1];
+        audioGameWin.Play();
         Restart();
     }
 
@@ -86,6 +94,7 @@ public class GameManager : MonoBehaviour
         if (!mazeGenerated) AskToScanAgain();
 
         chooseGameArea.SetupGame();
+        audioController.Init(chooseGameArea.GetGoose().transform);
     }
 
     public void BreadLvl(){

@@ -16,6 +16,9 @@ public class PortalRoom : Room
     [SerializeField] private Transform arrow;
     private bool doorOpened;
 
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioSource doorAudio;
+
     private MazeGenerator mazeGenerator;
 
     public override void SetupRoom(List<MazeGenerator.RoomDoorInfo> roomDoorInfos, MazeGenerator _mazeGenerator = null, List<Vector2Int> roomCells = null)
@@ -120,11 +123,14 @@ public class PortalRoom : Room
     }
 
     public void AddPass(){
+        audioSource.Play();
         if (doorOpened) return;
         currentPasses++;
 
         float t = (float)currentPasses / amountPasses;
         if (t >= 1){
+            doorAudio.Play();
+            doorOpened = true;
             t = 1;
             animatorDoor.enabled = true;
             animatorDoor.Play("Open", 0, 0);

@@ -193,7 +193,7 @@ public class MazeGenerator : MonoBehaviour
         BuildMazeWalls();
         Debug.Log("Success! Length: " + mainPath.Count);
 
-        ShowCellID();
+        //ShowCellID();
 
         InitFog();
         SpawnHoles();
@@ -402,6 +402,7 @@ public class MazeGenerator : MonoBehaviour
 
     void InitGrid()
     {
+        roomsDoors.Clear();
         grid = new MazeCell[gridWidth, gridHeight];
         for (int x = 0; x < gridWidth; x++)
         {
@@ -421,6 +422,12 @@ public class MazeGenerator : MonoBehaviour
                 GameObject obj = Instantiate(text, GridToWorldPosition(new Vector2Int(x, y)) + new Vector3(0, .15f, 0), Quaternion.identity);
                 spawnedObjects.Add(obj);
                 obj.GetComponent<TMP_Text>().text = new Vector2Int(x, y) + "";
+                string walls = "";
+                if (grid[x, y].wallLeft) walls += "L";
+                if (grid[x, y].wallBottom) walls += "B";
+                if (grid[x, y].wallRight) walls += "R";
+                if (grid[x, y].wallTop) walls += "T";
+                obj.transform.Find("walls").GetComponent<TMP_Text>().text = walls;
                 if (mainPath.Contains(new Vector2Int(x, y)))
                     obj.GetComponent<TMP_Text>().color = Color.blue;
                 if (startCell == new Vector2Int(x, y))
@@ -707,6 +714,7 @@ public class MazeGenerator : MonoBehaviour
                 if (!room.customWals && x - 1 < roomStartX && new Vector2Int(x - 1, y) != entranceDoor.outsideCell && new Vector2Int(x - 1, y) != exitDoor.outsideCell) 
                     grid[x, y].wallLeft = true;
                 else grid[x, y].wallLeft = false;
+
             }
         }
 
@@ -733,7 +741,7 @@ public class MazeGenerator : MonoBehaviour
             {
                 if (grid[x, y].isRoom)
                     continue;
-
+                
                 // check walls
                 if (x > 0 && grid[x - 1, y].isRoom)
                     grid[x, y].wallLeft = !grid[x - 1, y].noWalls;
@@ -743,7 +751,7 @@ public class MazeGenerator : MonoBehaviour
                     grid[x, y].wallBottom = !grid[x, y - 1].noWalls;
                 if (y < gridHeight - 1 && grid[x, y + 1].isRoom)
                     grid[x, y].wallTop = !grid[x, y + 1].noWalls;
-                
+
                 // check doors
                 if (CheckDoorBetween(new Vector2Int(x, y), new Vector2Int(x-1, y)))
                     grid[x, y].wallLeft = false;

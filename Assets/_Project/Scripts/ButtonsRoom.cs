@@ -8,6 +8,7 @@ public class ButtonsRoom : Room
     [SerializeField] private GameObject[] boxes;
 
     [SerializeField] private Animator animatorDoor;
+    [SerializeField] private AudioSource doorAudio;
 
     private MazeGenerator mazeGenerator;
 
@@ -75,10 +76,12 @@ public class ButtonsRoom : Room
     }
 
     public void ButtonPressed(){
+        if (doorOpened) return;
         currentActived++;
         if (currentActived >= needActived){
             animatorDoor.enabled = true;
             doorOpened = true;
+            doorAudio.Play();
             animatorDoor.SetTrigger("Open");
         }
     }

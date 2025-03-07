@@ -3,13 +3,15 @@ using UnityEngine;
 public class MovableObject : MonoBehaviour
 {
     public enum state{
-        idle, noUse
+        idle, dragging, noUse
     }
     [SerializeField] private float dragSpeed;
     [SerializeField] private state m_state;
     [SerializeField] private Rigidbody rb;
     [SerializeField] private Collider collider;
     [SerializeField] private float maxVelocity = 10;
+
+    [SerializeField] private AudioSource dragSound;
 
     void FixedUpdate()
     {
@@ -23,6 +25,15 @@ public class MovableObject : MonoBehaviour
 
     public float GetDragSpeed(){
         return dragSpeed;
+    }
+
+    public void StartDrag(){
+        m_state = state.dragging;
+        if (dragSound != null) dragSound.Play();
+    }
+    public void EndDrag(){
+        m_state = state.idle;
+        if (dragSound != null) dragSound.Stop();
     }
 
     public void SetState(state newState){

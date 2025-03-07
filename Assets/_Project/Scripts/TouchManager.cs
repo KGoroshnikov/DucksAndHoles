@@ -52,6 +52,7 @@ public class TouchManager : MonoBehaviour
         if (Physics.Raycast(ray, out hit, 1000, lmMovable)) {
             movingItem = true;
             movableObject = hit.collider.GetComponent<MovableObject>();
+            movableObject.StartDrag();
             rbMoving = movableObject.GetRigidbody();
             speedMove = movableObject.GetDragSpeed();
 
@@ -66,16 +67,16 @@ public class TouchManager : MonoBehaviour
             }
         }
 
-        Debug.Log("start: " + movingItem + " " + justTapped);
         if (!movingItem && !justTapped){
             playerController.StartMoving(touchPos);
         }
     }
     void EndTouch(Vector2 touchPos){
-        Debug.Log("end: " + movingItem + " " + justTapped);
         if (!movingItem && !justTapped){
             playerController.StopMoving(touchPos);
         }
+
+        if (movingItem) movableObject.EndDrag();
 
         justTapped = false;
         movingItem = false;

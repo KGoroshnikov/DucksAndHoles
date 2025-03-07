@@ -46,7 +46,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   walls: []
-  amountLvls: 10
+  amountLvls: 9
   lvlsPerRow: 5
   holePref: {fileID: 6819463870076796671, guid: 3170d1777193cd14f8f600715f6b4817,
     type: 3}

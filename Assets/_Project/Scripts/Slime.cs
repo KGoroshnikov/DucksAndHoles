@@ -11,6 +11,9 @@ public class Slime : MonoBehaviour
     [SerializeField] private float angerRange;
     private float myTime;
 
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip[] jumpAttackClips;
+
     private Transform goose;
 
     private MazeGenerator.MazeCell[,] grid;
@@ -56,6 +59,7 @@ public class Slime : MonoBehaviour
         transform.position = Vector3.Lerp(currentPos, targetPos, t);
 
         if (t >= 1){
+            PlaySFX(jumpAttackClips[1]);
             m_state = state.idle;
             Invoke("MoveToOtherCell", Random.Range(chillTime.x, chillTime.y));
         }
@@ -88,7 +92,13 @@ public class Slime : MonoBehaviour
         transform.forward = targetPos - transform.position;
 
         animator.SetTrigger("Jump");
+        PlaySFX(jumpAttackClips[0]);
+    }
 
+    void PlaySFX(AudioClip clip){
+        audioSource.clip = clip;
+        audioSource.pitch = Random.Range(0.8f, 1.2f);
+        audioSource.Play();
     }
 
     public void CanHit(){ // called from animations

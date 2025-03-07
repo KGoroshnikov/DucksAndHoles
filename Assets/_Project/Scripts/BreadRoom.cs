@@ -15,6 +15,9 @@ public class BreadRoom : Room
 
     private List<Transform> breads = new List<Transform>();
 
+    [SerializeField] private AudioSource collectBreadAudio;
+    [SerializeField] private AudioSource doorOpenAudio;
+
     public override void SetupRoom(List<MazeGenerator.RoomDoorInfo> roomDoorInfos, MazeGenerator _mazeGenerator = null, List<Vector2Int> roomCells = null)
     {
         mazeGenerator = _mazeGenerator;
@@ -54,10 +57,12 @@ public class BreadRoom : Room
             if (breads[i].gameObject.activeSelf && Vector3.Distance(breads[i].position, player.position) <= distToTake){
                 breads[i].gameObject.SetActive(false);
                 collected++;
+                collectBreadAudio.Play();
                 mazeGenerator.GetGameManager().UpdateBread(collected, BreadToCollect);
 
                 if (collected >= BreadToCollect){
                     animatorDoor.enabled = true;
+                    doorOpenAudio.Play();
                     animatorDoor.Play("Open", 0, 0);
                     active = false;
                 }

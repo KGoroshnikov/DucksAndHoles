@@ -8,6 +8,8 @@ public class ButtonObject : MonoBehaviour
     [SerializeField] private UnityEvent onPressed;
     [SerializeField] private UnityEvent onReleased;
 
+    [SerializeField] private AudioSource buttonAudio;
+
     private bool pressed;
 
     void Press(){
@@ -15,12 +17,14 @@ public class ButtonObject : MonoBehaviour
         pressed = true;
         animator.SetTrigger("Pressed");
         onPressed.Invoke();
+        buttonAudio.Play();
     }
     void Release(){
         if (!pressed) return;
         pressed = false;
         animator.SetTrigger("Released");
         onReleased.Invoke();
+        buttonAudio.Play();
     }
 
     void OnTriggerEnter(Collider other)

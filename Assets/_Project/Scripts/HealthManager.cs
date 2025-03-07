@@ -27,13 +27,16 @@ public class HealthManager : MonoBehaviour
         }
     }
 
-    public void TakeDamage(){
+    public void TakeDamage(int damage = 1){
         if (dead) return;
         if (currentHP == 6) healthUI.SetActive(true);
 
-        currentHP--;
+        currentHP -= damage;
+
+        playerController.GetHitted();
         
-        if (currentHP == 0){
+        if (currentHP <= 0){
+            currentHP = 0;
             dead = true;
             playerController.Die();
             Invoke("RestartLvl", 2.5f);
@@ -49,6 +52,10 @@ public class HealthManager : MonoBehaviour
                 hpIcons[idx].half.SetActive(false);
             }
         }
+    }
+
+    public void TakeHugeDamage(){
+        
     }
 
     void RestartLvl(){

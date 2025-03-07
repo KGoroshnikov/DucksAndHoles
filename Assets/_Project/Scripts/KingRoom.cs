@@ -10,10 +10,11 @@ public class KingRoom : Room
     [SerializeField] private float hitTimeIdle;
 
 
-
     [SerializeField] private float moveTime;
     [SerializeField] private Animator animator;
     [SerializeField] private float hitRange;
+    [SerializeField] private AudioSource slimeAudio;
+    [SerializeField] private AudioClip[] jumpHitClips;
 
     private Transform goose;
     private Vector3 currentPos;
@@ -58,6 +59,8 @@ public class KingRoom : Room
         m_state = state.jumping;
         king.forward = targetPos - king.position;
         animator.SetTrigger("Jump");
+        slimeAudio.clip = jumpHitClips[0];
+        slimeAudio.Play();
     }
 
     void CheckPlayer(){
@@ -72,12 +75,14 @@ public class KingRoom : Room
         m_state = state.jumping;
         king.forward = targetPos - king.position;
         animator.SetTrigger("Jump");
+        slimeAudio.clip = jumpHitClips[0];
+        slimeAudio.Play();
     }
 
     void FixedUpdate()
     {
         if (ableToHit && Vector3.Distance(king.position, goose.position) <= hitRange){
-            healthManager.TakeDamage();
+            healthManager.TakeDamage(3);
             ableToHit = false;
         }
 
@@ -90,6 +95,11 @@ public class KingRoom : Room
         t += Time.deltaTime / moveTime;
 
         king.position = Vector3.Lerp(currentPos, targetPos, t);
+        
+        if (t >= 1){
+            slimeAudio.clip = jumpHitClips[1];
+            slimeAudio.Play();
+        }
 
         if (t >= 1 && king.position != defaultKingPos){
             m_state = state.justHitted;

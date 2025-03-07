@@ -8,6 +8,8 @@ public class Bubble : MonoBehaviour, ITappable
     [SerializeField] private ParticleSystem particles;
     [SerializeField] private Collider collider;
     [SerializeField] private Animator animator;
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip[] tapPopClips;
     private bool popped;
 
     void Start(){
@@ -18,13 +20,19 @@ public class Bubble : MonoBehaviour, ITappable
     {
         HP--;
         if (popped || HP > 0){
-            if (!popped) animator.SetTrigger("Tapped");
+            if (!popped){
+                audioSource.clip = tapPopClips[0];
+                audioSource.Play();
+                animator.SetTrigger("Tapped");
+            }
             CancelInvoke("HealHP");
             InvokeRepeating("HealHP", healTime, healTime);
             return;
         }
         popped = true;
-
+        
+        audioSource.clip = tapPopClips[1];
+        audioSource.Play();
         particles.Play(true);
         animator.SetTrigger("Pop");
         collider.enabled = false;

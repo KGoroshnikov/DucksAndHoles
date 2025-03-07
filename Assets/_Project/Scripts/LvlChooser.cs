@@ -7,6 +7,8 @@ public class LvlChooser : MonoBehaviour
     [SerializeField] private MoveObjects moveObjects;
     [SerializeField] private GameManager gameManager;
 
+    [SerializeField] private AudioSource audioSourcePop;
+
     private bool active;
     private int chosenId;
     private int progress;
@@ -30,6 +32,7 @@ public class LvlChooser : MonoBehaviour
         Ray ray = Camera.main.ScreenPointToRay(touchPos);
         if (Physics.Raycast(ray, out hit)) {
             if (hit.collider.TryGetComponent<LvlHole>(out LvlHole lvlHole)){
+                audioSourcePop.Play();
                 if (lvlHole.GetID() > progress) return;
                 chosenId = lvlHole.GetID();
                 moveObjects.AddObjToMove(goose, 0.2f, hit.transform.position, goose.rotation, LoadLvl);

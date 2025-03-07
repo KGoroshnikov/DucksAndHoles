@@ -20,6 +20,8 @@ public class StaticHole : Room
         idle, sucked, closed
     }
 
+    [SerializeField] private AudioSource audioDrop;
+
 
     public override void SetupRoom(List<MazeGenerator.RoomDoorInfo> roomDoorInfos, MazeGenerator _mazeGenerator = null, List<Vector2Int> roomCells = null){
         base.SetupRoom(roomDoorInfos, _mazeGenerator, roomCells);
@@ -53,6 +55,7 @@ public class StaticHole : Room
 
     void SuckTheRock(){
         m_state = state.closed;
+        rockMovable.EndDrag();
         rockMovable.SetState(MovableObject.state.noUse);
         rockMovable.GetRigidbody().isKinematic = true;
         rockMovable.GetCollider().enabled = false;
@@ -61,6 +64,7 @@ public class StaticHole : Room
     }
     void AnimateRock(){
         moveObjects.AddObjToMove(rock, 1, finalRockPos.position, rock.rotation);
+        audioDrop.Play();
     }
 
     void SuckTheGoose(){
