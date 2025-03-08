@@ -13,18 +13,18 @@ MonoBehaviour:
   m_Name: Lvl9
   m_EditorClassIdentifier: 
   minPathLength: 10
-  maxMazeCellsX: 7
-  maxMazeCellsY: 7
+  maxMazeCellsX: 8
+  maxMazeCellsY: 8
   wrongHoles: 1
-  bubblesAmount: 0
+  bubblesAmount: 3
   customRooms:
-  - roomPrefab: {fileID: 244247500980041040, guid: 96eb56e009e2c22418b38bd88e56d196,
+  - roomPrefab: {fileID: 4398244656988244919, guid: fb7e35b5270cdc74c953905f1fa08559,
       type: 3}
     customWals: 0
-    pathFraction: 0.95
-    roomWidth: 2
-    roomHeight: 2
-    maxRoomPathTiles: 2
+    pathFraction: 0.6
+    roomWidth: 3
+    roomHeight: 3
+    maxRoomPathTiles: 4
   slimeAmount: 0
   startCellType: 0
   isLvlPath: 0

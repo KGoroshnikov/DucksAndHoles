@@ -37,8 +37,6 @@ public class GameManager : MonoBehaviour
 
     private int currentLvl;
 
-    private float fps;
-
     void Start()
     {
         Application.targetFrameRate = 60;
@@ -66,7 +64,7 @@ public class GameManager : MonoBehaviour
     public void LvlPassed(){
         if (currentLvl > PlayerPrefs.GetInt("LvlsCompleted", 0))
             PlayerPrefs.SetInt("LvlsCompleted", currentLvl);
-        if (currentLvl == 9){
+        if (currentLvl == AllLvls.Length){
             fadeAnim.SetTrigger("Fade");
             Invoke("LoadFinalScene", 2f);
         }
@@ -119,22 +117,6 @@ public class GameManager : MonoBehaviour
         chooseGameArea.SetupGame();
         audioController.Init(chooseGameArea.GetGoose().transform);
         tipManager.SetLevel(currentLvl);
-    }
-
-    void Update()
-    {
-        fps = 1.0f/Time.deltaTime;
-    }
-
-    void OnGUI()
-    {
-        GUIStyle guiStyle = new GUIStyle();
-        guiStyle.normal.textColor = Color.red;
-        guiStyle.fontSize = 40;
-        float yOffset = 50;
-        float lvlOffset = 50;
-
-        GUI.Label(new Rect(10, yOffset + lvlOffset * 1, 300, 200), "FPS: " + fps, guiStyle);
     }
 
     public void BreadLvl(){

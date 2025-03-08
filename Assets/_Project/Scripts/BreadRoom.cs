@@ -48,6 +48,7 @@ public class BreadRoom : Room
         SpawnBread(freeTiles);
 
         mazeGenerator.GetGameManager().BreadLvl();
+        mazeGenerator.GetGameManager().UpdateBread(collected, BreadToCollect);
     }
 
     void FixedUpdate()
