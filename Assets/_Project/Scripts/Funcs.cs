@@ -12,6 +12,11 @@ public class Funcs : MonoBehaviour
         return smoothedT;
     }
 
+    public static Quaternion GyroToUnity(Quaternion quat)
+    {
+        return new Quaternion(quat.x, quat.z, quat.y, -quat.w);
+    }
+
     public static List<Vector2> SortPointsCounterClockwiseXZ(List<Vector2> points)
     {
         Vector2 center = Vector2.zero;

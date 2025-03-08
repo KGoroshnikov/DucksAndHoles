@@ -6,6 +6,7 @@ public class MovableObject : MonoBehaviour
         idle, dragging, noUse
     }
     [SerializeField] private float dragSpeed;
+    [SerializeField] private float speedMul = 1;
     [SerializeField] private state m_state;
     [SerializeField] private Rigidbody rb;
     [SerializeField] private Collider collider;
@@ -15,6 +16,7 @@ public class MovableObject : MonoBehaviour
 
     void FixedUpdate()
     {
+        if (m_state != state.dragging) return;
         if (rb.linearVelocity.magnitude > maxVelocity)
             rb.linearVelocity = Vector3.ClampMagnitude(rb.linearVelocity, maxVelocity);
     }
@@ -25,6 +27,10 @@ public class MovableObject : MonoBehaviour
 
     public float GetDragSpeed(){
         return dragSpeed;
+    }
+
+    public float GetSpeedMul(){
+        return speedMul;
     }
 
     public void StartDrag(){

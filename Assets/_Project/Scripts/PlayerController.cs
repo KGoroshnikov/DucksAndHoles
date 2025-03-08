@@ -78,13 +78,9 @@ public class PlayerController : MonoBehaviour
         puffVFX.Play();
         dirtParticles.Play();
         m_state = State.running;
-        neutralEuler = GyroToUnity(phoneInputData.GetAttitude()).eulerAngles;
+        neutralEuler = Funcs.GyroToUnity(phoneInputData.GetAttitude()).eulerAngles;
         animator.SetTrigger("BallMode");
         rotAngleAnim = duckMesh.transform.localEulerAngles.x;
-    }
-    Quaternion GyroToUnity(Quaternion quat)
-    {
-        return new Quaternion(quat.x, quat.z, quat.y, -quat.w);
     }
 
     public void ResetPlayer(){
@@ -123,7 +119,7 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        Vector3 currentEuler = GyroToUnity(phoneInputData.GetAttitude()).eulerAngles;
+        Vector3 currentEuler = Funcs.GyroToUnity(phoneInputData.GetAttitude()).eulerAngles;
 
         float deltaX = Mathf.DeltaAngle(neutralEuler.x, currentEuler.x);
         float deltaY = -Mathf.DeltaAngle(neutralEuler.z, currentEuler.z);

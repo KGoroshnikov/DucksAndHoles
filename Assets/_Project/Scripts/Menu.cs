@@ -20,6 +20,9 @@ public class Menu : MonoBehaviour
 
     void Start()
     {
+        Application.targetFrameRate = 60;
+        QualitySettings.vSyncCount = 0;
+
         sliderText.text = "" + PlayerPrefs.GetFloat("PlayerVolume", 1).ToString("F1");
         slider.value = PlayerPrefs.GetFloat("PlayerVolume", 1);
     }

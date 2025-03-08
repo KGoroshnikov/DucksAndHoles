@@ -15,7 +15,8 @@ MonoBehaviour:
   minPathLength: 15
   maxMazeCellsX: 7
   maxMazeCellsY: 7
-  wrongHoles: 1
+  wrongHoles: 2
+  bubblesAmount: 0
   customRooms: []
   slimeAmount: 3
   startCellType: 0

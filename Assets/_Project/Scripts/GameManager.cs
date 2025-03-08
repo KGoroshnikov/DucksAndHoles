@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.XR.ARFoundation;
 
 public class GameManager : MonoBehaviour
@@ -25,13 +26,24 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Color greenColor;
     [SerializeField] private HealthManager healthManager;
     [SerializeField] private AudioController audioController;
+    [SerializeField] private Animator fadeAnim;
 
     private Vector3 playerStartLvlPos;
 
     [SerializeField] private AudioSource audioGameWin;
     [SerializeField] private AudioClip[] winLooseClips;
 
+    [SerializeField] private TipManager tipManager;
+
     private int currentLvl;
+
+    private float fps;
+
+    void Start()
+    {
+        Application.targetFrameRate = 60;
+        QualitySettings.vSyncCount = 0;
+    }
 
     public enum States{
         scanning, playing
@@ -54,10 +66,20 @@ public class GameManager : MonoBehaviour
     public void LvlPassed(){
         if (currentLvl > PlayerPrefs.GetInt("LvlsCompleted", 0))
             PlayerPrefs.SetInt("LvlsCompleted", currentLvl);
+        if (currentLvl == 9){
+            fadeAnim.SetTrigger("Fade");
+            Invoke("LoadFinalScene", 2f);
+        }
+        tipManager.HideTips();
         Restart();
         audioGameWin.clip = winLooseClips[0];
         audioGameWin.Play();
     }
+
+    void LoadFinalScene(){
+        SceneManager.LoadScene("Final");
+    }
+
     void Restart(){
         chooseGameArea.GetGoose().SetActive(true);
         breadUI.SetActive(false);
@@ -73,6 +95,7 @@ public class GameManager : MonoBehaviour
     public void LvlFailed(){
         audioGameWin.clip = winLooseClips[1];
         audioGameWin.Play();
+        tipManager.HideTips();
         Restart();
     }
 
@@ -95,6 +118,23 @@ public class GameManager : MonoBehaviour
 
         chooseGameArea.SetupGame();
         audioController.Init(chooseGameArea.GetGoose().transform);
+        tipManager.SetLevel(currentLvl);
+    }
+
+    void Update()
+    {
+        fps = 1.0f/Time.deltaTime;
+    }
+
+    void OnGUI()
+    {
+        GUIStyle guiStyle = new GUIStyle();
+        guiStyle.normal.textColor = Color.red;
+        guiStyle.fontSize = 40;
+        float yOffset = 50;
+        float lvlOffset = 50;
+
+        GUI.Label(new Rect(10, yOffset + lvlOffset * 1, 300, 200), "FPS: " + fps, guiStyle);
     }
 
     public void BreadLvl(){
@@ -104,5 +144,8 @@ public class GameManager : MonoBehaviour
         breadText.text = amount + " / " + maxamount;
         if (amount >= maxamount) breadText.color = greenColor;
         else breadText.color = redColor;
+    }
+    public TipManager GetTipManager(){
+        return tipManager;
     }
 }
