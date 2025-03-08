@@ -243,6 +243,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   dragSpeed: 0.5
+  speedMul: 1
   m_state: 0
   rb: {fileID: 3630118265010816725}
   collider: {fileID: 3458788758728387728}

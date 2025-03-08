@@ -78,7 +78,7 @@ Material:
     - _ZWrite: 1
     - _ZWriteControl: 1
     m_Colors:
-    - _GoosePos: {r: -1.0202957, g: 0.5862464, b: -0.73367715, a: 0}
+    - _GoosePos: {r: -0.8484297, g: 0.58892035, b: -0.5571767, a: 0}
     - _MainColor: {r: 1, g: 1, b: 1, a: 0.12156863}
     - _NoiseRange: {r: -0.5, g: 0.6, b: 0, a: 0}
     - _P1: {r: 0, g: 0, b: 0, a: 0}

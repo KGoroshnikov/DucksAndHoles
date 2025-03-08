@@ -10,21 +10,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bc812880e92b387479f07b6ce6f1e40c, type: 3}
-  m_Name: Lvl9
+  m_Name: Lvl10
   m_EditorClassIdentifier: 
   minPathLength: 10
-  maxMazeCellsX: 8
-  maxMazeCellsY: 8
+  maxMazeCellsX: 7
+  maxMazeCellsY: 7
   wrongHoles: 1
-  bubblesAmount: 3
+  bubblesAmount: 0
   customRooms:
-  - roomPrefab: {fileID: 4398244656988244919, guid: fb7e35b5270cdc74c953905f1fa08559,
+  - roomPrefab: {fileID: 244247500980041040, guid: 96eb56e009e2c22418b38bd88e56d196,
       type: 3}
     customWals: 0
-    pathFraction: 0.6
-    roomWidth: 3
-    roomHeight: 3
-    maxRoomPathTiles: 4
+    pathFraction: 0.95
+    roomWidth: 2
+    roomHeight: 2
+    maxRoomPathTiles: 2
   slimeAmount: 0
   startCellType: 0
   isLvlPath: 0
