@@ -10,7 +10,9 @@ public class ChooseGameArea : MonoBehaviour
     [SerializeField] private ARPlaneManager arPlaneManager;
     [SerializeField] private ARRaycastManager arRaycastManager;
     [SerializeField] private GameObject goosePrefab;
+    [SerializeField] private GameObject arrowPrefab;
     private GameObject spawnedGoose;
+    private GameObject spawnedArrow;
     private ARPlane currentPlane;
     private bool isActive = true;
 
@@ -29,19 +31,11 @@ public class ChooseGameArea : MonoBehaviour
 
     void OnEnable(){
         planeMat.SetFloat("_MaskRadius", 0);
-        //planeMat.SetFloat("_GameStage", 0);
-        //planeMat.SetFloat("_SmoothDist", 4.5f);
-        //planeMat.SetVector("_GoosePos", Vector3.zero);
         for(int i = 0; i < 4; i++) planeMat.SetVector("_P" + (i + 1), Vector2.zero);
-        //phoneInputData.OnStartTouch += Tapped;
     }
     void OnDisable(){
         planeMat.SetFloat("_MaskRadius", 0);
-        //planeMat.SetFloat("_GameStage", 0);
-        //planeMat.SetFloat("_SmoothDist", 4.5f);
-        //planeMat.SetVector("_GoosePos", Vector3.zero);
         for(int i = 0; i < 4; i++) planeMat.SetVector("_P" + (i + 1), Vector2.zero);
-        //phoneInputData.OnStartTouch -= Tapped;
     }
 
     public void SetGameGround(List<Vector2> points){
@@ -61,6 +55,7 @@ public class ChooseGameArea : MonoBehaviour
             Vector3 newPosition = hitPose.position;
             //newPosition.y += 0.05f;
             spawnedGoose.transform.position = newPosition;
+            spawnedArrow.transform.position = newPosition + new Vector3(0, 0.05f, 0);
             planeMat.SetVector("_GoosePos", newPosition);
         }
     }
@@ -68,7 +63,7 @@ public class ChooseGameArea : MonoBehaviour
     void Update(){
         if (isActive) return;
         tMask += Time.deltaTime / timeMask;
-        if (tMask <=1) //planeMat.SetFloat("_SmoothDist", math.lerp(4.5f, 0.2f, tMask));
+        if (tMask <=1)
             planeMat.SetFloat("_MaskRadius", math.lerp(0, 5, tMask));
     }
 
@@ -79,11 +74,9 @@ public class ChooseGameArea : MonoBehaviour
         {
             currentPlane = plane;
             Vector3 spawnPosition = plane.transform.position;
-            //spawnPosition.y += 0.05f;
             spawnedGoose = Instantiate(goosePrefab, spawnPosition, Quaternion.identity);
+            spawnedArrow = Instantiate(arrowPrefab, spawnPosition + new Vector3(0, 0.05f, 0), Quaternion.identity);
             planeMat.SetVector("_GoosePos", spawnPosition);
-            //planeMat.SetFloat("_SmoothDist", 4.5f);
-            //planeMat.SetFloat("_MaskRadius", 0.05f);
             break;
         }
     }
@@ -101,6 +94,7 @@ public class ChooseGameArea : MonoBehaviour
     }
 
     public void RemoveARPlanes(){
+        Destroy(spawnedArrow);
         isActive = false;
         MeshFilter meshFilter = currentPlane.GetComponent<MeshFilter>();
         foreach (ARPlane plane in arPlaneManager.trackables)
@@ -112,8 +106,6 @@ public class ChooseGameArea : MonoBehaviour
     }
 
     public void SetupGame(){
-        
-        //planeMat.SetFloat("_GameStage", 1);
         PlayerController playerController = spawnedGoose.GetComponent<PlayerController>();
         playerController.ResetPlayer();
         playerController.ActivateGoose(currentPlane.transform.position.y);

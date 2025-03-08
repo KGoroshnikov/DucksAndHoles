@@ -3,6 +3,7 @@ using UnityEngine;
 public class TouchManager : MonoBehaviour
 {
     private float speedMove;
+    private float speedMul;
 
     [SerializeField] private PlayerController playerController;
     [SerializeField] private LayerMask lmMovable;
@@ -41,7 +42,7 @@ public class TouchManager : MonoBehaviour
 
         Vector3 move = Vector3.Lerp(rbMoving.position, targetPos, speedMove);
         Vector3 delta = move - rbMoving.position;
-        rbMoving.AddForce(delta, ForceMode.VelocityChange);
+        rbMoving.AddForce(delta * speedMul, ForceMode.VelocityChange);
     }
 
     void StartTouch(Vector2 touchPos){
@@ -55,6 +56,7 @@ public class TouchManager : MonoBehaviour
             movableObject.StartDrag();
             rbMoving = movableObject.GetRigidbody();
             speedMove = movableObject.GetDragSpeed();
+            speedMul = movableObject.GetSpeedMul();
 
             if (movableObject.GetState() == MovableObject.state.noUse) movingItem = false;
         }

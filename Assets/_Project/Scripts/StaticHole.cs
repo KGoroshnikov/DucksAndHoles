@@ -31,6 +31,7 @@ public class StaticHole : Room
         rock.position = _mazeGenerator.GridToWorldPosition(randTile) + Vector3.up * Funcs.yOffset * 3;
         _mazeGenerator.UpdateTile(randTile, false);
         transform.position = new Vector3(transform.position.x, transform.position.y + Funcs.yOffset, transform.position.z);
+        _mazeGenerator.GetGameManager().GetTipManager().SetupLvl6(rock, _mazeGenerator.getGoose());
     }
 
     void Start()

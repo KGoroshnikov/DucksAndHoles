@@ -33,6 +33,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private AudioSource audioGameWin;
     [SerializeField] private AudioClip[] winLooseClips;
 
+    [SerializeField] private TipManager tipManager;
+
     private int currentLvl;
 
     private float fps;
@@ -68,6 +70,7 @@ public class GameManager : MonoBehaviour
             fadeAnim.SetTrigger("Fade");
             Invoke("LoadFinalScene", 2f);
         }
+        tipManager.HideTips();
         Restart();
         audioGameWin.clip = winLooseClips[0];
         audioGameWin.Play();
@@ -92,6 +95,7 @@ public class GameManager : MonoBehaviour
     public void LvlFailed(){
         audioGameWin.clip = winLooseClips[1];
         audioGameWin.Play();
+        tipManager.HideTips();
         Restart();
     }
 
@@ -114,6 +118,7 @@ public class GameManager : MonoBehaviour
 
         chooseGameArea.SetupGame();
         audioController.Init(chooseGameArea.GetGoose().transform);
+        tipManager.SetLevel(currentLvl);
     }
 
     void Update()
@@ -139,5 +144,8 @@ public class GameManager : MonoBehaviour
         breadText.text = amount + " / " + maxamount;
         if (amount >= maxamount) breadText.color = greenColor;
         else breadText.color = redColor;
+    }
+    public TipManager GetTipManager(){
+        return tipManager;
     }
 }
